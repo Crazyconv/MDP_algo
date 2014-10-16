@@ -56,6 +56,7 @@ public class RealRun2 {
     boolean wall;
     boolean backToStart;
     boolean senseFrontObstacle;
+    boolean sensorAlignFront;
     
     long t1,t2;
     
@@ -112,6 +113,7 @@ public class RealRun2 {
         out2=false;
         wall=false;
         senseFrontObstacle=false;
+         sensorAlignFront=false;
          
         this.m=new Map(occupancy,strP);
         this.eOM=new ExtendObstacleMap(); 
@@ -158,6 +160,10 @@ public class RealRun2 {
                 
           }
          printMap(curMap);
+         
+          if(canAlignFront()){
+            doAlignment();
+         }
         
          
          int circle=0;
@@ -173,6 +179,7 @@ public class RealRun2 {
       
        
         
+          
         while(count<300*coverage_limit||found_goal==0||found_start==0){
         
               
@@ -203,8 +210,32 @@ public class RealRun2 {
              
                
             //*****************Alignment********************************************
+               if((sensorAlignFront||canAlignFront())&&canAlignLeft()){
+                   
+                     turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+//                       
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                       cycle_counter=0;
+                       
+                       
+                       doAlignment();
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
                
-                 if(canAlignFront()){
+               }
+               
+               
+               
+                 if((sensorAlignFront||canAlignFront())&&!canAlignLeft()){
                      doAlignment();
                          
                        //cycle_counter=0;
@@ -214,8 +245,8 @@ public class RealRun2 {
                      
                  }
                  
-             if(cycle_counter>=3){
-                 if(canAlignLeft()){
+             
+                 if(!sensorAlignFront&&!canAlignFront()&&canAlignLeft()&&cycle_counter>=3){
                       turnLeft();
                          adjustSensor();
                          exploreOccupiedSpace(this.curPos);
@@ -234,26 +265,8 @@ public class RealRun2 {
                       m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
                      
                  }
-                 
-//                   if(canAlignFront()&&!canAlignLeft()){
-//                      doAlignment();
-//                          adjustSensor();
-//                         exploreOccupiedSpace(this.curPos);
-//                         updateMap(this.curPos);
-//                      
-//                       cycle_counter=0;
-//                       
-//                      align.add(new int[]{curPos[0],curPos[1]});
-//                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
-//                     
-//                 }
-                 
-                 
-                 
-                 
-                 
-             }
              
+       
             
              
              
@@ -352,16 +365,25 @@ public class RealRun2 {
          //System.out.println("stop at: "+curPos[0]+" "+curPos[1]);
          //printMap(curMap);
         
-        
-         dfsToStart(curPos);
-         for(int m=0;m<20;m++){
-                                    for(int n=0;n<15;n++){
-                                        if(curMap[m][n]==1){
-                                            curMap[m][n]=2;
+         if(curPos[0]!=1||curPos[1]!=1){ 
+             client.write("X|");
+         
+             dfsToStart(curPos);
+             for(int m=0;m<20;m++){
+                                        for(int n=0;n<15;n++){
+                                            if(curMap[m][n]==1){
+                                                curMap[m][n]=2;
+                                            }
                                         }
-                                    }
-                
-                         }
+
+             }
+         }
+         
+         if(!canAlignLeft()||!canAlignFront()){turnRight();}
+         turnLeft();
+         doAlignment();
+         turnRight();
+         doAlignment();
          
          goToGoal();
      }
@@ -386,16 +408,16 @@ public class RealRun2 {
          }
          System.out.println("command sent to robot: "+mySP.finalPath);
          //client.write(mySP.finalSteps);
-          client.write("T");
+         
           try{Thread.sleep(100);}catch(Exception e){}
-         client.write(mySP.finalPath);
+         client.write("R|"+mySP.finalPath);
          //m.paintSPath2(sp);
-        //!!!!!!!Robot command 
+        
          goBack(sp);
      }
      
       public void goToGoal(){
-          //!!!!!!!Robot command    
+          
          ShortestPath mySP = new ShortestPath(new int[]{1,1},new int[]{18,13} ,curMap);
          ArrayList sp2=mySP.searchShortestPath();
          if(sp2.size()>1){
@@ -405,8 +427,9 @@ public class RealRun2 {
          }
          //printShortestPath(sp2);
           System.out.println("command sent to robot: "+mySP.finalPath);
-         // client.write(mySP.finalSteps);
-          client.write("S");
+         
+           try{Thread.sleep(100);}catch(Exception e){}
+          client.write("P");
           try{Thread.sleep(100);}catch(Exception e){}
          client.write(mySP.finalPath);
          m.paintSPath2(sp2);
@@ -432,10 +455,7 @@ public class RealRun2 {
            
     } 
      
- //*********************Special Conditions to steer exploration direction*****************************************************    
  
- 
-     
  //****************************Check if surrounding is empty/movable********************************************** 
      
      
@@ -506,8 +526,8 @@ public class RealRun2 {
               if(curPos[1]==13) return true;
 //             if(curPos[1]<=11&&curMap[curPos[0]+1][curPos[1]+2]==2&&curMap[curPos[0]-1][curPos[1]+2]==2&&curMap[curPos[0]+1][curPos[1]+3]==3&&curMap[curPos[0]-1][curPos[1]+3]==3)
 //                 return true;
-//             if(curPos[1]<=12&&curMap[curPos[0]+1][curPos[1]+2]==3&&curMap[curPos[0]-1][curPos[1]+2]==3)
-//                 return true;
+             if(curPos[1]<=12&&curMap[curPos[0]+1][curPos[1]+2]==3&&curMap[curPos[0]-1][curPos[1]+2]==3)
+                 return true;
 //            
 //             else return (curPos[1]==12&&curMap[curPos[0]+1][curPos[1]+2]==2&&curMap[curPos[0]-1][curPos[1]+2]==2);
               else return false;
@@ -517,8 +537,8 @@ public class RealRun2 {
              if(curPos[0]==18) return true;
 //             if(curPos[0]<=16&&curMap[curPos[0]+2][curPos[1]-1]==2&&curMap[curPos[0]+2][curPos[1]+1]==2&&curMap[curPos[0]+3][curPos[1]-1]==3&&curMap[curPos[0]+3][curPos[1]+1]==3)
 //                 return true;
-//             if(curPos[0]<=17&&curMap[curPos[0]+2][curPos[1]-1]==3&&curMap[curPos[0]+2][curPos[1]+1]==3)
-//                 return true;
+             if(curPos[0]<=17&&curMap[curPos[0]+2][curPos[1]-1]==3&&curMap[curPos[0]+2][curPos[1]+1]==3)
+                 return true;
 //             
 //             else return (curPos[0]==17&&curMap[curPos[0]+2][curPos[1]-1]==2&&curMap[curPos[0]+2][curPos[1]+1]==2);
              else return false;
@@ -529,8 +549,8 @@ public class RealRun2 {
 //             if(curPos[0]>=3&&curMap[curPos[0]-2][curPos[1]+1]==2&&curMap[curPos[0]-2][curPos[1]-1]==2&&curMap[curPos[0]-3][curPos[1]+1]==3&&curMap[curPos[0]-3][curPos[1]-1]==3)
 //                     return true;
 //             
-//             if(curPos[0]>=2&&curMap[curPos[0]-2][curPos[1]+1]==3&&curMap[curPos[0]-2][curPos[1]-1]==3)
-//                     return true;
+             if(curPos[0]>=2&&curMap[curPos[0]-2][curPos[1]+1]==3&&curMap[curPos[0]-2][curPos[1]-1]==3)
+                     return true;
 //             
 //             else return (curPos[0]==2&&curMap[curPos[0]-2][curPos[1]+1]==2&&curMap[curPos[0]-2][curPos[1]-1]==2);
              else return false;
@@ -540,8 +560,8 @@ public class RealRun2 {
             if(curPos[1]==1) return true;
 //            if(curPos[1]>=3&&curMap[curPos[0]+1][curPos[1]-2]==2&&curMap[curPos[0]-1][curPos[1]-2]==2&&curMap[curPos[0]+1][curPos[1]-3]==3&&curMap[curPos[0]-1][curPos[1]-3]==3)
 //                 return true;
-//            if(curPos[1]>=2&&curMap[curPos[0]+1][curPos[1]-2]==3&&curMap[curPos[0]-1][curPos[1]-2]==3)
-//                 return true;
+            if(curPos[1]>=2&&curMap[curPos[0]+1][curPos[1]-2]==3&&curMap[curPos[0]-1][curPos[1]-2]==3)
+                 return true;
 //            
 //             else return (curPos[1]==2&&curMap[curPos[0]+1][curPos[1]-2]==2&&curMap[curPos[0]-1][curPos[1]-2]==2);
             else return false;
@@ -555,7 +575,7 @@ public class RealRun2 {
      }
      
      
-     public boolean canAlignLeft(){
+    public boolean canAlignLeft(){
          
          
          if(d[0]==0&&d[1]==1) {
@@ -563,8 +583,8 @@ public class RealRun2 {
              
 //             if(curPos[0]<=16&&curMap[curPos[0]+2][curPos[1]+1]==2&&curMap[curPos[0]+2][curPos[1]-1]==2&&curMap[curPos[0]+3][curPos[1]+1]==3&&curMap[curPos[0]+3][curPos[1]-1]==3)
 //                 return true;
-//              if(curPos[0]<=17&&curMap[curPos[0]+2][curPos[1]+1]==3&&curMap[curPos[0]+2][curPos[1]-1]==3)
-//                 return true;
+              if(curPos[0]<=17&&curMap[curPos[0]+2][curPos[1]+1]==3&&curMap[curPos[0]+2][curPos[1]-1]==3)
+                return true;
 //              
 //             else return (curPos[0]==17&&curMap[curPos[0]+2][curPos[1]+1]==2&&curMap[curPos[0]+2][curPos[1]-1]==2);
              else return false;
@@ -574,8 +594,8 @@ public class RealRun2 {
              if(curPos[1]==1) return true;
 //             if(curPos[1]>=3&&curMap[curPos[0]+1][curPos[1]-2]==2&&curMap[curPos[0]-1][curPos[1]-2]==2&&curMap[curPos[0]+1][curPos[1]-3]==3&&curMap[curPos[0]-1][curPos[1]-3]==3)
 //                 return true;
-//             if(curPos[1]>=2&&curMap[curPos[0]+1][curPos[1]-2]==3&&curMap[curPos[0]-1][curPos[1]-2]==3)
-//                 return true;
+            if(curPos[1]>=2&&curMap[curPos[0]+1][curPos[1]-2]==3&&curMap[curPos[0]-1][curPos[1]-2]==3)
+                 return true;
 //             
 //             else return (curPos[1]==2&&curMap[curPos[0]+1][curPos[1]-2]==2&&curMap[curPos[0]-1][curPos[1]-2]==2);
              else return false;
@@ -586,8 +606,8 @@ public class RealRun2 {
 //             if(curPos[1]<=11&&curMap[curPos[0]+1][curPos[1]+2]==2&&curMap[curPos[0]-1][curPos[1]+2]==2&&curMap[curPos[0]+1][curPos[1]+3]==3&&curMap[curPos[0]-1][curPos[1]+3]==3)
 //                     return true;
 //             
-//             if(curPos[1]<=12&&curMap[curPos[0]+1][curPos[1]+2]==3&&curMap[curPos[0]-1][curPos[1]+2]==3)
-//                     return true;
+             if(curPos[1]<=12&&curMap[curPos[0]+1][curPos[1]+2]==3&&curMap[curPos[0]-1][curPos[1]+2]==3)
+                     return true;
 //            
 //             
 //                 else return (curPos[1]==12&&curMap[curPos[0]+1][curPos[1]+2]==2&&curMap[curPos[0]-1][curPos[1]+2]==2);
@@ -598,8 +618,8 @@ public class RealRun2 {
              if(curPos[0]==1) return true;
 //            if(curPos[0]>=3&&curMap[curPos[0]-2][curPos[1]+1]==2&&curMap[curPos[0]-2][curPos[1]-1]==2&&curMap[curPos[0]-3][curPos[1]+1]==3&&curMap[curPos[0]-3][curPos[1]-1]==3)
 //                 return true;
-//            if(curPos[0]>=2&&curMap[curPos[0]-2][curPos[1]+1]==3)
-//                 return true;
+            if(curPos[0]>=2&&curMap[curPos[0]-2][curPos[1]+1]==3&&curMap[curPos[0]-2][curPos[1]-1]==3)
+                 return true;
 //            
 //            
 //             else return (curPos[0]==2&&curMap[curPos[0]-2][curPos[1]+1]==2&&curMap[curPos[0]-2][curPos[1]-1]==2);
@@ -707,7 +727,7 @@ public class RealRun2 {
                 sensor5.add(new int[]{-1,4});
                 sensor5.add(new int[]{-1,5});
                 sensor5.add(new int[]{-1,6});
-                sensor5.add(new int[]{-1,7});
+               // sensor5.add(new int[]{-1,7});
                 //sensor5.add(new int[]{-1,8});
         
         
@@ -733,7 +753,7 @@ public class RealRun2 {
                 sensor5.add(new int[]{4,1});
                 sensor5.add(new int[]{5,1});
                 sensor5.add(new int[]{6,1});
-                sensor5.add(new int[]{7,1});
+               // sensor5.add(new int[]{7,1});
                 //sensor5.add(new int[]{8,1});
         
         }
@@ -757,7 +777,7 @@ public class RealRun2 {
                 sensor5.add(new int[]{1,-4});
                 sensor5.add(new int[]{1,-5});
                 sensor5.add(new int[]{1,-6});
-                sensor5.add(new int[]{1,-7});
+               // sensor5.add(new int[]{1,-7});
                 //sensor5.add(new int[]{1,-8});
         }
         
@@ -779,7 +799,7 @@ public class RealRun2 {
                 sensor5.add(new int[]{-4,-1});
                 sensor5.add(new int[]{-5,-1});
                 sensor5.add(new int[]{-6,-1});
-                sensor5.add(new int[]{-7,-1});
+                //sensor5.add(new int[]{-7,-1});
                 //sensor5.add(new int[]{-8,-1});
         
         
@@ -789,13 +809,15 @@ public class RealRun2 {
 
   //**************************************************************************      
           
-     public void updateMap(int[] pos){
+      public void updateMap(int[] pos){
          ////////////add statements to receive info from arduino
+         //System.out.println("SENSING........");
          String sensorData=client.read();
          System.out.println("$$$$$$$$$$received from sensor: "+sensorData);
          
-         interpretSensor(sensorData);
+         if (sensorData==null) {System.out.println("sensor Data null"); return;}
          
+         interpretSensor(sensorData);
          boolean inSR=false;
          
          //sensor1
@@ -806,7 +828,10 @@ public class RealRun2 {
                        break;}
                    
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
+                       if(temp==0) temp=2;
+                       
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                       
@@ -825,7 +850,10 @@ public class RealRun2 {
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
+                       if(temp==0) temp=2;
+                       
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
@@ -842,7 +870,10 @@ public class RealRun2 {
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { break;}
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
+                       if(temp==0) temp=2;
+                       
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
@@ -860,7 +891,10 @@ public class RealRun2 {
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
+                       if(temp==0) temp=2;
+                       
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
@@ -877,7 +911,10 @@ public class RealRun2 {
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {inSR=true;break;}
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
+                       if(temp==0) temp=2;
+                       
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
@@ -887,6 +924,21 @@ public class RealRun2 {
              }
                    
          }
+          
+          for(int i=0;i<3;i++){
+              for(int j=0;j<3;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
+          
+          for(int i=17;i<20;i++){
+              for(int j=17;j<20;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
+          
           
           
           if(inSR==true) return;
@@ -898,7 +950,10 @@ public class RealRun2 {
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) break;
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
+                       if(temp==0) temp=2;
+                       
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
@@ -908,14 +963,27 @@ public class RealRun2 {
              }
                    
          }
-      
+          
+             for(int i=0;i<3;i++){
+              for(int j=0;j<3;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
+          
+          for(int i=17;i<20;i++){
+              for(int j=17;j<20;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
       
          
      
      }
      
      
-       public void interpretSensor(String s){
+        public void interpretSensor(String s){
          //interprete string
          //update occupancy!! map
          s=s.substring(0, s.length()-1);
@@ -932,6 +1000,7 @@ public class RealRun2 {
          
          boolean isSR=false;
          this.senseFrontObstacle=false;
+         this.sensorAlignFront=false;
          
          String[] as=new String[6];
          as=s.split(",");
@@ -946,10 +1015,12 @@ public class RealRun2 {
          
          r2-=3;
          r4-=3;
-         r6+=1.5;
+         
          r5+=4;
+         //r6+=1.5;
          
          if(r2<15||r3==1||r4<15) senseFrontObstacle=true;
+         if(r2<15&&r4<15) sensorAlignFront=true;
          
          if(r1<26&&r6>=0) {
              i=(int)(r1+4-10)/10;
@@ -1022,7 +1093,7 @@ public class RealRun2 {
          if(isSR==true) return;
          
         
-         if(r5>27&&r5<65) {
+         if(r5>27&&r5<55) {
              i=(int)(r5+4-30)/10;
              t=(int[])sensor5.get(i);
              
@@ -1219,6 +1290,64 @@ public class RealRun2 {
              adjustSensor();
              exploreOccupiedSpaceDFS(pos);
              updateMap(this.curPos);  
+             
+             
+                //*****************Alignment********************************************
+               if(canAlignFront()&&canAlignLeft()){
+                   
+                     turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+                     
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                      
+                       
+                       
+                       doAlignment();
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+               
+               }
+               
+               
+               
+                 if(canAlignFront()&&!canAlignLeft()){
+                     doAlignment();
+                         
+                       //cycle_counter=0;
+                       
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+                     
+                 }
+                 
+             
+                 if(!canAlignFront()&&canAlignLeft()){
+                      turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+                       
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                      
+                       
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+                     
+                 }
 
              //if(unknownWithinSensor()) updateMap(this.curPos);  
             // printMap(curMap);
@@ -1238,22 +1367,14 @@ public class RealRun2 {
                 int[] oldPos=new int[]{pos[0],pos[1]};  
                 
                 generateCommandDFS(d[0],d[1],w[0],w[1]);
-                //d[0]=w[0];
-                //d[1]=w[1];
-                //move to next position
-                //cPos[0]=pos[0]+w[0];
-                //cPos[1]=pos[1]+w[1];
-                
+            
                 
             //try{Thread.sleep(delay);}catch(Exception e){}
                 
                 //m.updateRobPos(pos[0],pos[1],cPos[0],cPos[1]);
                 m.updateRobPos(oldPos[0],oldPos[1],pos[0],pos[1]);
                 
-                //pos[0]=cPos[0];   
-                //pos[1]=cPos[1];     
-               
-      
+             
                 dfsToStart(pos);      
                 if(out2==true) return;
 
@@ -1268,15 +1389,10 @@ public class RealRun2 {
                 temp[1]=pos[1];
                         
              //try{Thread.sleep(delay);}catch(Exception e){}
-                //if(path.size()==0){System.out.println("Error"); System.exit(0);}
+                if(path.size()==0){System.out.println("Error"); System.exit(0);}
                 int[] tpos=(int[])path2.remove(path2.size()-1);
                 generateCommandDFS(d[0],d[1],tpos[0]-pos[0],tpos[1]-pos[1]);
-                //pos=(int[])path.remove(path.size()-1);
-                //d[0]=tpos[0]-pos[0];
-                //d[1]=tpos[1]-pos[1];
-                
-                //pos[0]=tpos[0];
-                //pos[1]=tpos[1];
+            
                 m.updateRobPos(temp[0],temp[1],pos[0],pos[1]);
                         
             }
@@ -1291,6 +1407,7 @@ public class RealRun2 {
  
  
  
+   
    public void dfs(int[] pos){
         //int[] cPos=new int[2];  //next position
                    
@@ -1317,6 +1434,63 @@ public class RealRun2 {
              adjustSensor();
              exploreOccupiedSpaceDFS(pos);
              updateMap(pos);  
+             
+                //*****************Alignment********************************************
+               if(canAlignFront()&&canAlignLeft()){
+                   
+                     turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+                     
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                      
+                       
+                       
+                       doAlignment();
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+               
+               }
+               
+               
+               
+                 if(canAlignFront()&&!canAlignLeft()){
+                     doAlignment();
+                         
+                       //cycle_counter=0;
+                       
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+                     
+                 }
+                 
+             
+                 if(!canAlignFront()&&canAlignLeft()){
+                      turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+                       
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                      
+                       
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+                     
+                 }
 
         //WNES        
             for(int i=0;i<4;i++){

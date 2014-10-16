@@ -386,6 +386,9 @@ public class Testing {
         System.out.println("5: Time limited exploration "); 
         System.out.println("6: Real run ");
         System.out.println("7: Simulate Real run ");
+        System.out.println("9: Simulate Real run dfs to start: ");
+        System.out.println("10: Real run dfs to start ");
+
 
         
         
@@ -612,7 +615,7 @@ public class Testing {
                  
             case(9):  //Complete exploration on simulator+dfs to start
                
-              strP=new int[]{10,7};     //9,7 for sample3,  1 grid impossible to explore for sample3
+              strP=new int[]{9,7};     //9,7 for sample3,  1 grid impossible to explore for sample3
   
                coverage_limit=1;
                time_limit=1000000000;
@@ -640,6 +643,31 @@ public class Testing {
                  
                 
                 
+                break;
+            
+             case 10:  //real run DFS+WALL+DFS
+                
+                strP=new int[]{9,7};
+                
+                endP=new int[]{18,13};
+                
+                
+               coverage_limit=1;
+               time_limit=1000000000;
+               mustFindGoal=true;
+               
+               RealRun2 rr2=new RealRun2(strP,coverage_limit,occupancy7,time_limit);
+                rr2.start_Exploration(mustFindGoal);
+                System.out.println("Exploration complete");
+                
+                
+               
+                //map descriptor
+                tCM=md.transCurMap(rr2.curMap);
+                s=md.twoDtoStrings(tCM);
+                System.out.println(s.get(0));
+                System.out.println(s.get(1));
+               
                 break;
                 
             default:

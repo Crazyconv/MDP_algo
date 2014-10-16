@@ -55,6 +55,7 @@ public class RealRun {
     
     boolean wall;
     boolean senseFrontObstacle;
+    boolean sensorAlignFront;
     
     long t1,t2;
     
@@ -106,6 +107,7 @@ public class RealRun {
         out2=false;
         wall=false;
         senseFrontObstacle=false;
+        sensorAlignFront=false;
          
         this.m=new Map(occupancy,strP);
         this.eOM=new ExtendObstacleMap(); 
@@ -153,7 +155,9 @@ public class RealRun {
           }
          printMap(curMap);
         
-         
+         if(canAlignFront()){
+            doAlignment();
+         }
          int circle=0;
 
          this.stopP=new int[]{curPos[0],curPos[1]}; 
@@ -197,7 +201,7 @@ public class RealRun {
              
                
             //*****************Alignment********************************************
-               if(canAlignFront()&&canAlignLeft()){
+               if((sensorAlignFront||canAlignFront())&&canAlignLeft()){
                    
                      turnLeft();
                          adjustSensor();
@@ -205,7 +209,7 @@ public class RealRun {
                          updateMap(this.curPos);
                          
                       doAlignment();
-//                       
+                     
                       turnRight();
                           adjustSensor();
                          exploreOccupiedSpace(this.curPos);
@@ -222,7 +226,7 @@ public class RealRun {
                
                
                
-                 if(canAlignFront()&&!canAlignLeft()){
+                 if((sensorAlignFront||canAlignFront())&&!canAlignLeft()){
                      doAlignment();
                          
                        //cycle_counter=0;
@@ -233,14 +237,14 @@ public class RealRun {
                  }
                  
              
-                 if(!canAlignFront()&&canAlignLeft()&&cycle_counter>=3){
+                 if(!sensorAlignFront&&!canAlignFront()&&canAlignLeft()&&cycle_counter>=3){
                       turnLeft();
                          adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
                          
                       doAlignment();
-//                       
+                       
                       turnRight();
                           adjustSensor();
                          exploreOccupiedSpace(this.curPos);
@@ -253,28 +257,7 @@ public class RealRun {
                      
                  }
              
-                 
-//                   if(canAlignFront()&&!canAlignLeft()){
-//                      doAlignment();
-//                          adjustSensor();
-//                         exploreOccupiedSpace(this.curPos);
-//                         updateMap(this.curPos);
-//                      
-//                       cycle_counter=0;
-//                       
-//                      align.add(new int[]{curPos[0],curPos[1]});
-//                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
-//                     
-//                 }
-                 
-                 
-                 
-                 
-                 
-             
-             
-            
-             
+
              
              
           //*************************************************************
@@ -370,10 +353,18 @@ public class RealRun {
          //System.out.println("Goal found= "+found);
          //System.out.println("stop at: "+curPos[0]+" "+curPos[1]);
          //printMap(curMap);
+         
         
         
+         
          goToStart();
-         try{Thread.sleep(100);}catch(Exception e){}
+         
+         if(!canAlignLeft()||!canAlignFront()){turnRight();}
+         turnLeft();
+         doAlignment();
+         turnRight();
+         doAlignment();
+        
          goToGoal();
      }
 //************************************************************************************    
@@ -397,16 +388,16 @@ public class RealRun {
          }
          System.out.println("command sent to robot: "+mySP.finalPath);
          //client.write(mySP.finalSteps);
-          client.write("T");
-          try{Thread.sleep(100);}catch(Exception e){}
-         client.write(mySP.finalPath);
+         
+         try{Thread.sleep(100);}catch(Exception e){}
+         client.write("R|"+mySP.finalPath);
          //m.paintSPath2(sp);
-        //!!!!!!!Robot command 
+        
          goBack(sp);
      }
      
       public void goToGoal(){
-          //!!!!!!!Robot command    
+             
          ShortestPath mySP = new ShortestPath(new int[]{1,1},new int[]{18,13} ,curMap);
          ArrayList sp2=mySP.searchShortestPath();
          if(sp2.size()>1){
@@ -417,7 +408,8 @@ public class RealRun {
          //printShortestPath(sp2);
           System.out.println("command sent to robot: "+mySP.finalPath);
          // client.write(mySP.finalSteps);
-          client.write("S");
+          try{Thread.sleep(100);}catch(Exception e){}
+          client.write("P");
           try{Thread.sleep(100);}catch(Exception e){}
          client.write(mySP.finalPath);
          m.paintSPath2(sp2);
@@ -485,6 +477,10 @@ public void exploreAgain(){
                         
                        
                         System.out.println("count= "+count);
+                        
+                        //SENSE AGAIN
+                        client.write("X");
+                        
                         dfsAgain(curPos);
                         //printMap(curMap);
                          for(int m=0;m<20;m++){
@@ -591,8 +587,8 @@ public void exploreAgain(){
               if(curPos[1]==13) return true;
 //             if(curPos[1]<=11&&curMap[curPos[0]+1][curPos[1]+2]==2&&curMap[curPos[0]-1][curPos[1]+2]==2&&curMap[curPos[0]+1][curPos[1]+3]==3&&curMap[curPos[0]-1][curPos[1]+3]==3)
 //                 return true;
-//             if(curPos[1]<=12&&curMap[curPos[0]+1][curPos[1]+2]==3&&curMap[curPos[0]-1][curPos[1]+2]==3)
-//                 return true;
+             if(curPos[1]<=12&&curMap[curPos[0]+1][curPos[1]+2]==3&&curMap[curPos[0]-1][curPos[1]+2]==3)
+                 return true;
 //            
 //             else return (curPos[1]==12&&curMap[curPos[0]+1][curPos[1]+2]==2&&curMap[curPos[0]-1][curPos[1]+2]==2);
               else return false;
@@ -602,8 +598,8 @@ public void exploreAgain(){
              if(curPos[0]==18) return true;
 //             if(curPos[0]<=16&&curMap[curPos[0]+2][curPos[1]-1]==2&&curMap[curPos[0]+2][curPos[1]+1]==2&&curMap[curPos[0]+3][curPos[1]-1]==3&&curMap[curPos[0]+3][curPos[1]+1]==3)
 //                 return true;
-//             if(curPos[0]<=17&&curMap[curPos[0]+2][curPos[1]-1]==3&&curMap[curPos[0]+2][curPos[1]+1]==3)
-//                 return true;
+             if(curPos[0]<=17&&curMap[curPos[0]+2][curPos[1]-1]==3&&curMap[curPos[0]+2][curPos[1]+1]==3)
+                 return true;
 //             
 //             else return (curPos[0]==17&&curMap[curPos[0]+2][curPos[1]-1]==2&&curMap[curPos[0]+2][curPos[1]+1]==2);
              else return false;
@@ -614,8 +610,8 @@ public void exploreAgain(){
 //             if(curPos[0]>=3&&curMap[curPos[0]-2][curPos[1]+1]==2&&curMap[curPos[0]-2][curPos[1]-1]==2&&curMap[curPos[0]-3][curPos[1]+1]==3&&curMap[curPos[0]-3][curPos[1]-1]==3)
 //                     return true;
 //             
-//             if(curPos[0]>=2&&curMap[curPos[0]-2][curPos[1]+1]==3&&curMap[curPos[0]-2][curPos[1]-1]==3)
-//                     return true;
+             if(curPos[0]>=2&&curMap[curPos[0]-2][curPos[1]+1]==3&&curMap[curPos[0]-2][curPos[1]-1]==3)
+                     return true;
 //             
 //             else return (curPos[0]==2&&curMap[curPos[0]-2][curPos[1]+1]==2&&curMap[curPos[0]-2][curPos[1]-1]==2);
              else return false;
@@ -625,8 +621,8 @@ public void exploreAgain(){
             if(curPos[1]==1) return true;
 //            if(curPos[1]>=3&&curMap[curPos[0]+1][curPos[1]-2]==2&&curMap[curPos[0]-1][curPos[1]-2]==2&&curMap[curPos[0]+1][curPos[1]-3]==3&&curMap[curPos[0]-1][curPos[1]-3]==3)
 //                 return true;
-//            if(curPos[1]>=2&&curMap[curPos[0]+1][curPos[1]-2]==3&&curMap[curPos[0]-1][curPos[1]-2]==3)
-//                 return true;
+            if(curPos[1]>=2&&curMap[curPos[0]+1][curPos[1]-2]==3&&curMap[curPos[0]-1][curPos[1]-2]==3)
+                 return true;
 //            
 //             else return (curPos[1]==2&&curMap[curPos[0]+1][curPos[1]-2]==2&&curMap[curPos[0]-1][curPos[1]-2]==2);
             else return false;
@@ -648,8 +644,8 @@ public void exploreAgain(){
              
 //             if(curPos[0]<=16&&curMap[curPos[0]+2][curPos[1]+1]==2&&curMap[curPos[0]+2][curPos[1]-1]==2&&curMap[curPos[0]+3][curPos[1]+1]==3&&curMap[curPos[0]+3][curPos[1]-1]==3)
 //                 return true;
-//              if(curPos[0]<=17&&curMap[curPos[0]+2][curPos[1]+1]==3&&curMap[curPos[0]+2][curPos[1]-1]==3)
-//                 return true;
+              if(curPos[0]<=17&&curMap[curPos[0]+2][curPos[1]+1]==3&&curMap[curPos[0]+2][curPos[1]-1]==3)
+                return true;
 //              
 //             else return (curPos[0]==17&&curMap[curPos[0]+2][curPos[1]+1]==2&&curMap[curPos[0]+2][curPos[1]-1]==2);
              else return false;
@@ -659,8 +655,8 @@ public void exploreAgain(){
              if(curPos[1]==1) return true;
 //             if(curPos[1]>=3&&curMap[curPos[0]+1][curPos[1]-2]==2&&curMap[curPos[0]-1][curPos[1]-2]==2&&curMap[curPos[0]+1][curPos[1]-3]==3&&curMap[curPos[0]-1][curPos[1]-3]==3)
 //                 return true;
-//             if(curPos[1]>=2&&curMap[curPos[0]+1][curPos[1]-2]==3&&curMap[curPos[0]-1][curPos[1]-2]==3)
-//                 return true;
+            if(curPos[1]>=2&&curMap[curPos[0]+1][curPos[1]-2]==3&&curMap[curPos[0]-1][curPos[1]-2]==3)
+                 return true;
 //             
 //             else return (curPos[1]==2&&curMap[curPos[0]+1][curPos[1]-2]==2&&curMap[curPos[0]-1][curPos[1]-2]==2);
              else return false;
@@ -671,8 +667,8 @@ public void exploreAgain(){
 //             if(curPos[1]<=11&&curMap[curPos[0]+1][curPos[1]+2]==2&&curMap[curPos[0]-1][curPos[1]+2]==2&&curMap[curPos[0]+1][curPos[1]+3]==3&&curMap[curPos[0]-1][curPos[1]+3]==3)
 //                     return true;
 //             
-//             if(curPos[1]<=12&&curMap[curPos[0]+1][curPos[1]+2]==3&&curMap[curPos[0]-1][curPos[1]+2]==3)
-//                     return true;
+             if(curPos[1]<=12&&curMap[curPos[0]+1][curPos[1]+2]==3&&curMap[curPos[0]-1][curPos[1]+2]==3)
+                     return true;
 //            
 //             
 //                 else return (curPos[1]==12&&curMap[curPos[0]+1][curPos[1]+2]==2&&curMap[curPos[0]-1][curPos[1]+2]==2);
@@ -683,8 +679,8 @@ public void exploreAgain(){
              if(curPos[0]==1) return true;
 //            if(curPos[0]>=3&&curMap[curPos[0]-2][curPos[1]+1]==2&&curMap[curPos[0]-2][curPos[1]-1]==2&&curMap[curPos[0]-3][curPos[1]+1]==3&&curMap[curPos[0]-3][curPos[1]-1]==3)
 //                 return true;
-//            if(curPos[0]>=2&&curMap[curPos[0]-2][curPos[1]+1]==3)
-//                 return true;
+            if(curPos[0]>=2&&curMap[curPos[0]-2][curPos[1]+1]==3&&curMap[curPos[0]-2][curPos[1]-1]==3)
+                 return true;
 //            
 //            
 //             else return (curPos[0]==2&&curMap[curPos[0]-2][curPos[1]+1]==2&&curMap[curPos[0]-2][curPos[1]-1]==2);
@@ -792,7 +788,7 @@ public void exploreAgain(){
                 sensor5.add(new int[]{-1,4});
                 sensor5.add(new int[]{-1,5});
                 sensor5.add(new int[]{-1,6});
-                sensor5.add(new int[]{-1,7});
+                //sensor5.add(new int[]{-1,7});
                 //sensor5.add(new int[]{-1,8});
         
         
@@ -818,7 +814,7 @@ public void exploreAgain(){
                 sensor5.add(new int[]{4,1});
                 sensor5.add(new int[]{5,1});
                 sensor5.add(new int[]{6,1});
-                sensor5.add(new int[]{7,1});
+                //sensor5.add(new int[]{7,1});
                 //sensor5.add(new int[]{8,1});
         
         }
@@ -842,7 +838,7 @@ public void exploreAgain(){
                 sensor5.add(new int[]{1,-4});
                 sensor5.add(new int[]{1,-5});
                 sensor5.add(new int[]{1,-6});
-                sensor5.add(new int[]{1,-7});
+                //sensor5.add(new int[]{1,-7});
                 //sensor5.add(new int[]{1,-8});
         }
         
@@ -864,7 +860,7 @@ public void exploreAgain(){
                 sensor5.add(new int[]{-4,-1});
                 sensor5.add(new int[]{-5,-1});
                 sensor5.add(new int[]{-6,-1});
-                sensor5.add(new int[]{-7,-1});
+                //sensor5.add(new int[]{-7,-1});
                 //sensor5.add(new int[]{-8,-1});
         
         
@@ -879,6 +875,7 @@ public void exploreAgain(){
          String sensorData=client.read();
          System.out.println("$$$$$$$$$$received from sensor: "+sensorData);
          
+         if (sensorData==null) {System.out.println("sensor Data null"); return;}
          interpretSensor(sensorData);
          
          boolean inSR=false;
@@ -890,16 +887,19 @@ public void exploreAgain(){
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { 
                        break;}
                    
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
+                       
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
-                        
+                      
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       count++;
+                       
                      
                        if(temp==3) { eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]);  break;};
-                    }
+                   }  
              }
                    
          }
@@ -909,15 +909,16 @@ public void exploreAgain(){
              int[] t=(int[]) sensor2.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
+                       
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
-                     
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       count++;
                        if(temp==3) {  eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]);break;};
-                    }
+                   }
              }
                    
          }
@@ -928,80 +929,114 @@ public void exploreAgain(){
              int[] t=(int[]) sensor3.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { break;}
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
+                       
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
-                     
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       count++;
+                       
                        if(temp==3) {   eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
-                    }
+                   } 
              }
                    
          }
           
           //sensor4
-
           for(int i=0;i<sensor4.size();i++){
 
              int[] t=(int[]) sensor4.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
+                       
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
-                     
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       count++;
+                       
                        if(temp==3) { eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
-                    }
+                   } 
              }
                    
          }
           
-     
-          
-           //sensor6
+          //sensor6 right SR 
           for(int i=0;i<sensor6.size();i++){  
              int[] t=(int[]) sensor6.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {inSR=true;break;}
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
+                       
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
-                      
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       count++;
+                      
                        if(temp==3) {inSR=true;eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
-                    }
+                   } 
              }
                    
          }
+             
+          for(int i=0;i<3;i++){
+              for(int j=0;j<3;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
+          
+          for(int i=17;i<20;i++){
+              for(int j=17;j<20;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
+      
           
           
           if(inSR==true) return;
           
           
-          //sensor5
+          // sensor 5 right LR
           for(int i=0;i<sensor5.size();i++){  
              int[] t=(int[]) sensor5.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) break;
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
+                       
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
-                      
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       count++;
+                       
                        if(temp==3) {eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
-                    }
+                   } 
              }
                    
          }
+          
+          for(int i=0;i<3;i++){
+              for(int j=0;j<3;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
+          
+          for(int i=17;i<20;i++){
+              for(int j=17;j<20;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
       
          
      
@@ -1025,7 +1060,7 @@ public void exploreAgain(){
          
          boolean isSR=false;
          this.senseFrontObstacle=false;
-         
+         this.sensorAlignFront=false;
          String[] as=new String[6];
          as=s.split(",");
          
@@ -1039,10 +1074,12 @@ public void exploreAgain(){
          
          r2-=3;
          r4-=3;
-         //r6+=1.5;
+         
          r5+=4;
+         //r6+=1.5;
          
          if(r2<15||r3==1||r4<15) senseFrontObstacle=true;
+         if(r2<15&&r4<15) sensorAlignFront=true;
          
          if(r1<26&&r6>=0) {
              i=(int)(r1+4-10)/10;
@@ -1115,7 +1152,7 @@ public void exploreAgain(){
          if(isSR==true) return;
          
         
-         if(r5>27&&r5<65) {
+         if(r5>27&&r5<55) {
              i=(int)(r5+4-30)/10;
              t=(int[])sensor5.get(i);
              
@@ -1304,6 +1341,64 @@ public void exploreAgain(){
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
+                 
+                 
+                    //*****************Alignment********************************************
+               if(canAlignFront()&&canAlignLeft()){
+                   
+                     turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+                     
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                      
+                       
+                       
+                       doAlignment();
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+               
+               }
+               
+               
+               
+                 if(canAlignFront()&&!canAlignLeft()){
+                     doAlignment();
+                         
+                       //cycle_counter=0;
+                       
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+                     
+                 }
+                 
+             
+                 if(!canAlignFront()&&canAlignLeft()){
+                      turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+                       
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                      
+                       
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+                     
+                 }
         //WNES        
             for(int i=0;i<4;i++){
                 int[] w=(int[]) direc.get(i);
@@ -1378,7 +1473,7 @@ public void exploreAgain(){
         
         while(!wall){
              //System.out.println("dfs:   count "+count);
-   
+             
             
              System.out.println("*******current pos: "+pos[0]+" "+pos[1]);
              System.out.println("*******current direc: "+d[0]+" "+d[1]);
@@ -1386,6 +1481,64 @@ public void exploreAgain(){
              adjustSensor();
              exploreOccupiedSpaceDFS(pos);
              updateMap(pos);  
+             
+             
+                //*****************Alignment********************************************
+               if(canAlignFront()&&canAlignLeft()){
+                   
+                     turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+                     
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                      
+                       
+                       
+                       doAlignment();
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+               
+               }
+               
+               
+               
+                 if(canAlignFront()&&!canAlignLeft()){
+                     doAlignment();
+                         
+                       //cycle_counter=0;
+                       
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+                     
+                 }
+                 
+             
+                 if(!canAlignFront()&&canAlignLeft()){
+                      turnLeft();
+                         adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                         
+                      doAlignment();
+                       
+                      turnRight();
+                          adjustSensor();
+                         exploreOccupiedSpace(this.curPos);
+                         updateMap(this.curPos);
+                      
+                      
+                       
+                      align.add(new int[]{curPos[0],curPos[1]});
+                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
+                     
+                 }
 
         //WNES        
             for(int i=0;i<4;i++){
