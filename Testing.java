@@ -475,8 +475,32 @@ public class Testing {
             
             case(3): //Generate Map Descriptor
                 //change anyMap
-                int[][] anyMap=new int[20][15];
-                anyMap=occupancy1;
+                int[][] anyMap =new int[][]{   //explored map
+                    
+                    
+                   //0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
+                    {2,2,2,3,2,2,2,2,2,2,2,2,2,2,2},   //0
+                    {2,2,2,2,2,2,2,2,2,3,2,2,2,2,2},   //1
+                    {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},   //2
+                    {2,2,2,2,2,2,3,2,2,2,2,2,2,2,3},   //3
+                    {2,2,2,2,2,2,3,3,2,2,2,2,2,2,3},   //4
+                    {2,2,2,2,2,2,3,3,2,2,2,2,2,2,3},   //5
+                    {2,2,2,2,2,2,2,3,2,2,2,2,2,3,2},   //6
+                    {2,2,2,2,2,2,2,2,2,2,2,3,3,3,2},   //7
+                    {3,3,3,2,2,2,2,2,2,2,2,3,3,3,2},   //8
+                    {2,3,3,3,2,2,2,2,2,2,2,2,2,2,2},   //9
+                    {2,2,2,2,2,2,3,2,2,2,2,2,2,2,2},   //10
+                    {2,2,2,2,2,2,2,3,3,3,3,2,2,2,2},   //11
+                    {2,2,2,2,2,2,2,3,3,3,3,2,2,2,2},   //12
+                    {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},   //13
+                    {2,2,2,2,2,2,2,2,2,2,2,2,2,2,3},   //14
+                    {2,3,3,3,2,2,2,2,2,2,2,2,2,2,3},   //15
+                    {2,0,0,3,2,2,2,2,2,2,2,2,2,2,2},   //16
+                    {0,0,0,0,3,2,2,3,2,2,2,2,2,2,2},   //17
+                    {0,0,0,0,0,0,2,3,2,2,2,2,2,2,2},   //18
+                    {0,0,0,0,0,0,0,3,2,2,2,2,2,2,2},     //19
+                    
+                 }; 
                 tCM=md.transCurMap(anyMap);
                 s=md.twoDtoStrings(tCM);
                 System.out.println(s.get(0));
@@ -620,7 +644,7 @@ public class Testing {
                coverage_limit=1;
                time_limit=1000000000;
                mustFindGoal=true;
-               speed=10;
+               speed=20;
                
                
                ws5=new WallSticking5(strP,coverage_limit,sample5,time_limit,speed);
@@ -669,6 +693,32 @@ public class Testing {
                 System.out.println(s.get(1));
                
                 break;
+                 
+                 
+            case 11:  //real run DFS+WALL+DFS+full exploration
+                
+                strP=new int[]{9,7};
+                
+                endP=new int[]{18,13};
+                
+                
+               coverage_limit=1;
+               time_limit=1000000000;
+               mustFindGoal=true;
+               
+               RealRun3 rr3=new RealRun3(strP,coverage_limit,occupancy7,time_limit);
+                rr3.start_Exploration(mustFindGoal);
+                System.out.println("Exploration complete");
+                
+                
+               
+                //map descriptor
+                tCM=md.transCurMap(rr3.curMap);
+                s=md.twoDtoStrings(tCM);
+                System.out.println(s.get(0));
+                System.out.println(s.get(1));
+               
+                break;     
                 
             default:
                 System.out.println("Invalid input");

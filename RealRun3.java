@@ -2,7 +2,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.math.*;
 
-public class RealRun {
+public class RealRun3 {
     int[] sPos=new int[2];
     
    
@@ -64,7 +64,7 @@ public class RealRun {
     
    // 0 for unexplored; 1 for visited; 2 for empty space but not visited ; 3 for obstacle; 5 for goal
     
-     public  RealRun(int[] strP,double coverage_limit,int[][] occupancy,long time_limit){
+     public  RealRun3(int[] strP,double coverage_limit,int[][] occupancy,long time_limit){
         
         this.client=new Client();
         client.setUp("192.168.22.1",5000);  //host, port
@@ -104,7 +104,7 @@ public class RealRun {
         
        
         
-        this.count=9;  //count explored
+        this.count=18;  //count explored
       
         this.cycle_counter=0;
         this.found_goal=0;
@@ -129,6 +129,12 @@ public class RealRun {
             for(int j=0;j<3;j++)
                 curMap[19-i][14-j]=2;   //5 for Goal
         }
+        
+         for(int i=0;i<3;i++){
+            for(int j=0;j<3;j++)
+                curMap[i][j]=2;   //5 for Goal
+        }
+             
                 
         
        
@@ -212,10 +218,10 @@ public class RealRun {
                     System.out.println(ss.get(0));
                     System.out.println(ss.get(1));
                     
-                    ShortestPath mySP6 = new ShortestPath(new int[]{1,1},new int[]{18,13} ,curMap);
-                    ArrayList sp6=mySP6.searchShortestPath();
+                    //ShortestPath mySP6 = new ShortestPath(new int[]{1,1},new int[]{18,13} ,curMap);
+                    //ArrayList sp6=mySP6.searchShortestPath();
                     
-                    if((count>=300*coverage_limit||sp6.size()>1)&&found_goal!=0) break;
+                    if(count>=300*coverage_limit&&found_goal!=0) break;
                     
                     
                   
@@ -384,10 +390,25 @@ public class RealRun {
          //System.out.println("stop at: "+curPos[0]+" "+curPos[1]);
          //printMap(curMap);
          String sensorData1;
-      
          
-         if(curPos[0]!=1||curPos[1]!=1){
-            goToStart();
+         if(curPos[0]!=1||curPos[1]!=1){ 
+             sensorData1=client.read();
+             System.out.println("$$$$$$$$$$received from sensor: "+sensorData1);
+         
+             client.write("X|");
+         
+             dfsToStart(curPos);
+            sensorData1=client.read();
+            System.out.println("$$$$$$$$$$received from sensor: "+sensorData1);
+         
+             for(int m=0;m<20;m++){
+                                        for(int n=0;n<15;n++){
+                                            if(curMap[m][n]==1){
+                                                curMap[m][n]=2;
+                                            }
+                                        }
+
+             }
          }
          
          while(!canAlignLeft()||!canAlignFront()){
@@ -433,9 +454,8 @@ public class RealRun {
              int[] t2=(int[])sp.get(1);
              int[] correctDirec=new int[]{t2[0]-curPos[0],t2[1]-curPos[1]};
              while(d[0]!=correctDirec[0]||d[1]!=correctDirec[1]) {turnRight();}
-             
-             
-             System.out.println("command sent to robot: "+mySP.finalPath);
+         }
+         System.out.println("command sent to robot: "+mySP.finalPath);
          //client.write(mySP.finalSteps);
          
           try{Thread.sleep(100);}catch(Exception e){}
@@ -443,10 +463,6 @@ public class RealRun {
          //m.paintSPath2(sp);
         
          goBack(sp);
-         
-         
-         }
-         
      }
      
       public void goToGoal(){
@@ -511,6 +527,8 @@ public class RealRun {
              
        
              //open SENSOR
+             try{Thread.sleep(100);}catch(Exception e){}
+               client.write("P");
             
                try{Thread.sleep(100);}catch(Exception e){}
                client.write("X|");
@@ -1920,5 +1938,6 @@ public void newExplorationToGoal(){
  
  
 }
+
 
 

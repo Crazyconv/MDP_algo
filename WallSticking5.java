@@ -110,7 +110,7 @@ public class WallSticking5 {
         
        
         
-        this.count=9;  //count explored
+        this.count=18;  //count explored
       
         this.cycle_counter=0;
         this.found_goal=0;
@@ -134,6 +134,11 @@ public class WallSticking5 {
             for(int j=0;j<3;j++)
                 curMap[19-i][14-j]=2;   //5 for Goal
         }
+        
+        for(int i=0;i<3;i++){
+            for(int j=0;j<3;j++)
+                curMap[i][j]=2;   //5 for Goal
+        }
                 
         
        
@@ -144,7 +149,10 @@ public class WallSticking5 {
          
          t1 = System.currentTimeMillis();
          
-       
+       MapDescriptor md1=new MapDescriptor();
+         int[][] tCM1=new int[20][15];
+         ArrayList<String> ss=new ArrayList<String>(); //Map Descriptor Strings
+         
          
          dfs(curPos);
          
@@ -177,20 +185,10 @@ public class WallSticking5 {
          adjustSensor();
          exploreOccupiedSpace(this.curPos);
          updateMap(this.curPos);
-        /*
-        
-        //int leftObstacle=1; 
-        System.out.println("d "+d[0]+","+d[1]);
-        while(!isLeftWall(curPos)){
-            turnRight();
-            System.out.println("d "+d[0]+","+d[1]);
-        } 
-          * 
-          */
-          
+   
         
         
-        while(count<300*coverage_limit||found_goal==0||found_start==0){
+       while(count<300*coverage_limit||found_goal==0||found_start==0){
         
               
              
@@ -214,29 +212,54 @@ public class WallSticking5 {
                //System. out.println("********found goal="+found_goal);
                
                if(curPos[0]==18&&curPos[1]==13){found_goal++; if(count>=300*coverage_limit&&found_start!=0) break;}
-               if(curPos[0]==1&&curPos[1]==1){found_start++; if(count>=300*coverage_limit&&found_goal!=0) break;}
+               
+               if(curPos[0]==1&&curPos[1]==1){
+                   
+                    System.out.println("#########Total count= "+count);
+                   found_start++; 
+                    tCM1=md1.transCurMap(this.curMap);
+                    ss=md1.twoDtoStrings(tCM1);
+                    System.out.println(ss.get(0));
+                    System.out.println(ss.get(1));
+                    
+                    ShortestPath mySP6 = new ShortestPath(new int[]{1,1},new int[]{18,13} ,curMap);
+                    ArrayList sp6=mySP6.searchShortestPath();
+                    
+                    if((count>=300*coverage_limit)&&found_goal!=0) break;
+                    
+                    
+                  
+                   
+               }
+               
+               if(found_start>=3) break;
+              
                
                if(!mustFindGoal&&count>=300*coverage_limit){break;}
-             
-                 
             //*****************Alignment********************************************
                if(canAlignFront()&&canAlignLeft()){
                    
                      turnLeft();
+                    
                          adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
+                      
+                       try{Thread.sleep(delay);}catch(Exception e){}   
                          
                       doAlignment();
-                     
+                      
+                      try{Thread.sleep(delay);}catch(Exception e){}
+                      
                       turnRight();
+                      
                           adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
                       
                        cycle_counter=0;
                        
-                       
+                        try{Thread.sleep(delay);}catch(Exception e){}
                        doAlignment();
                       align.add(new int[]{curPos[0],curPos[1]});
                       m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
@@ -261,14 +284,19 @@ public class WallSticking5 {
                          adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
+                      
+                       try{Thread.sleep(delay);}catch(Exception e){}
+   
                          
                       doAlignment();
+                      try{Thread.sleep(delay);}catch(Exception e){}
                        
                       turnRight();
+                      
                           adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
-                      
+                      try{Thread.sleep(delay);}catch(Exception e){}
                        cycle_counter=0;
                        
                       align.add(new int[]{curPos[0],curPos[1]});
@@ -284,6 +312,7 @@ public class WallSticking5 {
                 
                 try{Thread.sleep(delay);}catch(Exception e){}
                     turnLeft();
+                   
                     adjustSensor();
                     exploreOccupiedSpace(this.curPos);
                     updateMap(this.curPos);
@@ -299,7 +328,7 @@ public class WallSticking5 {
                     exploreOccupiedSpace(this.curPos);
                     updateMap(this.curPos);
                     
-                     m.updateRobPos(ox, oy, curPos[0], curPos[1]);
+                     m.updateRobPos2(ox, oy, curPos[0], curPos[1],d[0],d[1]);
                       
                     //System. out.println("@@@@@@@@@@@@@@no obstacle on front and no obstacle in left, turn left and move forward");
                     continue;
@@ -341,7 +370,7 @@ public class WallSticking5 {
                     exploreOccupiedSpace(this.curPos);
                     updateMap(this.curPos);
                      
-                     m.updateRobPos(ox, oy, curPos[0], curPos[1]);
+                     m.updateRobPos2(ox, oy, curPos[0], curPos[1],d[0],d[1]);
 
                     
                 
@@ -362,19 +391,55 @@ public class WallSticking5 {
          
          
          
-         System.out.println("Total count= "+count);
+         System.out.println("#############Total count= "+count);
+        
+         String sensorData1;
+         
+         if(curPos[0]!=1||curPos[1]!=1){ 
+             //sensorData1=client.read();
+             System.out.println("$$$$$$$$$$received from sensor: ");
+         
+              System.out.println("X|");
+         
+             dfsToStart(curPos);
+            //sensorData1=client.read();
+            System.out.println("$$$$$$$$$$received from sensor: ");
+         
+             for(int m=0;m<20;m++){
+                                        for(int n=0;n<15;n++){
+                                            if(curMap[m][n]==1){
+                                                curMap[m][n]=2;
+                                            }
+                                        }
+
+             }
+         }
+         
+         while(!canAlignLeft()||!canAlignFront()){
+             turnRight();
+             //sensorData1=client.read();
+             System.out.println("$$$$$$$$$$received from sensor: ");
+            
+         }
+         
+         turnLeft();
+         //sensorData1=client.read();
+         System.out.println("$$$$$$$$$$received from sensor: ");
+         
         
          
-         dfsToStart(curPos);
-             for(int m=0;m<20;m++){
-                                    for(int n=0;n<15;n++){
-                                        if(curMap[m][n]==1){
-                                            curMap[m][n]=2;
-                                        }
-                                    }
-                
-                         }
+         doAlignment();
+         
+         turnRight();
+         //sensorData1=client.read();
+         System.out.println("$$$$$$$$$$received from sensor: ");
+         
+         
+         
+         doAlignment();
+         
          goToGoal();
+     
      }
      
      
@@ -388,45 +453,103 @@ public class WallSticking5 {
      }
     
  //****************************Shortest Path**********************************************  
+    //****************************Shortest Path**********************************************  
      public void goToStart(){
-         
-         
-         System.out.println("GO TO START");
-         System.out.println("CURRENT DIRECTION "+d[0]+","+d[1]);
-         System.out.println("CURRENT POSOTION "+curPos[0]+","+curPos[1]);
+            
          ShortestPath mySP = new ShortestPath(curPos,new int[]{1,1} ,curMap);
          ArrayList sp=mySP.searchShortestPath();
-         
          if(sp.size()>1){
              int[] t2=(int[])sp.get(1);
              int[] correctDirec=new int[]{t2[0]-curPos[0],t2[1]-curPos[1]};
              while(d[0]!=correctDirec[0]||d[1]!=correctDirec[1]) {turnRight();}
-         
          }
+         System.out.println("command sent to robot: "+mySP.finalPath);
+         //client.write(mySP.finalSteps);
+         
+          try{Thread.sleep(100);}catch(Exception e){}
+         System.out.println("R|"+mySP.finalPath);
          //m.paintSPath2(sp);
-         System.out.println(mySP.finalSteps);
-         System.out.println(mySP.finalPath);
+        
          goBack(sp);
      }
      
       public void goToGoal(){
-         System.out.println("GO TO GOAL"); 
-         System.out.println("CURRENT DIRECTION "+d[0]+","+d[1]);
-         System.out.println("CURRENT POSOTION "+curPos[0]+","+curPos[1]);
+             
          ShortestPath mySP = new ShortestPath(new int[]{1,1},new int[]{18,13} ,curMap);
          ArrayList sp2=mySP.searchShortestPath();
-         
          if(sp2.size()>1){
              int[] t2=(int[])sp2.get(1);
              int[] correctDirec=new int[]{t2[0]-curPos[0],t2[1]-curPos[1]};
              while(d[0]!=correctDirec[0]||d[1]!=correctDirec[1]) {turnRight();}
+             
+                 //printShortestPath(sp2);
+              System.out.println("command sent to robot: "+mySP.finalPath);
+             // client.write(mySP.finalSteps);
+              try{Thread.sleep(100);}catch(Exception e){}
+              System.out.println("P");
+              try{Thread.sleep(100);}catch(Exception e){}
+             System.out.println(mySP.finalPath);
+             m.paintSPath2(sp2);
+             goBack(sp2);
          }
          
-         //printShortestPath(sp1);
-         m.paintSPath2(sp2);
-         System.out.println(mySP.finalSteps);
-         System.out.println(mySP.finalPath);
-         goBack(sp2);
+         else if(curPos[0]!=18||curPos[1]!=13){
+             
+                 //clear curMap and eOM
+                //initialize current map
+            for(int i=0;i<length;i++)
+                for(int j=0;j<width;j++)
+                    curMap[i][j]=0;
+
+
+            for(int i=0;i<3;i++){
+                for(int j=0;j<3;j++)
+                    curMap[19-i][14-j]=2;   //5 for Goal
+            }
+
+
+            for(int i=0;i<3;i++){
+                for(int j=0;j<3;j++)
+                    curMap[i][j]=2;   //5 for Goal
+            }
+
+            this.eOM=new ExtendObstacleMap(); 
+        
+             
+             
+             
+             adjustSensor();
+             exploreOccupiedSpace(curPos);
+            
+             
+             
+             while(d[0]!=1||d[1]!=0) {
+                 turnLeft();
+                 adjustSensor();
+                 exploreOccupiedSpace(this.curPos);
+                 updateMap(this.curPos);
+      
+             
+             
+             }
+             
+       
+             //open SENSOR
+             try{Thread.sleep(100);}catch(Exception e){}
+              System.out.println("P");
+            
+               try{Thread.sleep(100);}catch(Exception e){}
+               System.out.println("X|");
+             adjustSensor();
+             exploreOccupiedSpace(curPos);
+             updateMap(this.curPos);
+             
+             
+             //newExplorationToGoal();
+         }
+         
+         else return;
+         
      }
       
      public void goBack(ArrayList a){
@@ -438,100 +561,18 @@ public class WallSticking5 {
                 oP=(int[])a.get(i);
                 nP=(int[])a.get(i+1);
               try{Thread.sleep(delay);}catch(Exception e){}
-                m.updateRobPos(oP[0],oP[1],nP[0],nP[1]);
-                curPos[0]=nP[0];
-                curPos[1]=nP[1];
                 d[0]=nP[0]-oP[0];
                 d[1]=nP[1]-oP[1];
+                m.updateRobPos2(oP[0],oP[1],nP[0],nP[1],d[0],d[1]);
+                curPos[0]=nP[0];
+                curPos[1]=nP[1];
+                
                 
             }
            
     } 
      
- //*****************************************************************************************    
-   
-     
-     
-/*    
  
-public void exploreAgain(){
-        int[] tempG;
-        
-        
-        
-        this.eOM2=new ExtendObstacleMap();
-        for(int m=0;m<20;m++){
-            for(int n=0;n<15;n++){
-                if(curMap[m][n]==3||curMap[m][n]==0) eOM2.extendObstacle(m, n);
-            }
-        }
-        
-        //System.out.println("CURMAP");
-        //printMap(curMap);
-        //System.out.println("eOM2");
-        eOM2.printEOM();
-        
-        for(int i=0;i<20;i++){
-            for(int j=0;j<15;j++){
-                if(curMap[i][j]==0){
-                    tempG=hasEmptyNeighbor(i,j);
-                    if(tempG!=null){
-                        //System.out.println();
-                        //System.out.println("tempG "+tempG[0]+","+tempG[1]);
-                        //System.out.println();
-                        ShortestPath mySP = new ShortestPath(curPos,tempG ,curMap);
-                        ArrayList sp1=mySP.searchShortestPath(); 
-                        
-                        if(sp1.size()>1){
-                            int[] t2=(int[])sp1.get(1);
-                            int[] correctDirec=new int[]{t2[0]-curPos[0],t2[1]-curPos[1]};
-                            while(d[0]!=correctDirec[0]||d[1]!=correctDirec[1]) {turnRight();}
-                        }
-                         System.out.println(mySP.finalSteps);
-                        System.out.println(mySP.finalPath);
-                        goBack(sp1);
-                        
-                        
-                       
-                        //System.out.println("count= "+count);
-                        dfsAgain(curPos);
-                        //printMap(curMap);
-                         for(int m=0;m<20;m++){
-                                    for(int n=0;n<15;n++){
-                                        if(curMap[m][n]==1){
-                                            curMap[m][n]=2;
-                                        }
-                                    }
-                
-                         }
-                       // printMap(curMap);
-        
-                        return;
-                    }
-                
-                }
-            }
-        
-        }
-     
-     }
-  public int[] hasEmptyNeighbor(int i,int j){
-      for(int m=-2;m<3;m++){
-          for(int n=-2;n<3;n++){
-              if(withinBoundary(i+m,n+j)){
-                  if(curMap[i+m][n+j]==2&&eOM2.isMovable(i+m,n+j)) return new int[]{i+m,n+j};
-              
-              }
-          }
-      
-      }
-      
-      return null;
-  
-  }
-      * 
-      * 
-      */
      
  //****************************Check if surrounding is empty/movable********************************************** 
      
@@ -732,7 +773,7 @@ public void exploreAgain(){
          else if(d[0]==-1&&d[1]==0){d[0]=0;d[1]=1;}
          else if(d[0]==0&&d[1]==1){d[0]=1;d[1]=0;}
          else {d[0]=0;d[1]=-1;}
-         
+          m.updateRobPos2(curPos[0],curPos[1],curPos[0],curPos[1],d[0],d[1]);
          //robot command
          //client.write("A|");
          System.out.println("A|");
@@ -744,7 +785,7 @@ public void exploreAgain(){
          else if(d[0]==1&&d[1]==0){d[0]=0;d[1]=1;}
          else if(d[0]==0&&d[1]==1){d[0]=-1;d[1]=0;}
          else {d[0]=0;d[1]=-1;}
-         
+          m.updateRobPos2(curPos[0],curPos[1],curPos[0],curPos[1],d[0],d[1]);
          //robot command
         //client.write("D|");
          System.out.println("D|");
@@ -889,7 +930,8 @@ public void exploreAgain(){
         }
      }
 
-  //**************************************************************************      
+   //**************************************************************************      
+          
           
      public void updateMap(int[] pos){
          ////////////add statements to receive info from arduino
@@ -900,41 +942,46 @@ public void exploreAgain(){
         // interpretSensor(sensorData);
          boolean inSR=false;
          
-         //sensor1
+       //sensor1
          for(int i=0;i<sensor1.size();i++){
+             
              int[] t=(int[]) sensor1.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
+                 
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { 
                        break;}
                    
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
-                       if(temp==0) temp=2;
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
+	               if(temp==0) temp=2;
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                       
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       
+                       count++;
                      
                        if(temp==3) { eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]);  break;};
-                   }  
+                    }
              }
                    
          }
          
          //sensor2
           for(int i=0;i<sensor2.size();i++){
+               
              int[] t=(int[]) sensor2.get(i);
-             if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+            if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
+                //if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
+                       
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       if(temp==3) {  eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]);break;};
-                   }
+                       
+                       if(temp==3) { eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
+                   } 
              }
                    
          }
@@ -942,17 +989,20 @@ public void exploreAgain(){
           
           //sensor3
           for(int i=0;i<sensor3.size();i++){
+             
              int[] t=(int[]) sensor3.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { break;}
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                //if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
+                       
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
                        
-                       if(temp==3) {   eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
+                       if(temp==3) { eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
                    } 
              }
                    
@@ -960,13 +1010,15 @@ public void exploreAgain(){
           
           //sensor4
           for(int i=0;i<sensor4.size();i++){
-
+            
              int[] t=(int[]) sensor4.get(i);
-             if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
+            if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
+                //if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
+                   
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
+                       
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
@@ -978,22 +1030,36 @@ public void exploreAgain(){
          }
           
           //sensor6 right SR 
-          for(int i=0;i<sensor6.size();i++){  
+          for(int i=0;i<sensor6.size();i++){ 
+              
              int[] t=(int[]) sensor6.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {inSR=true;break;}
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
                        if(temp==0) temp=2;
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                      
+                       count++;
                        if(temp==3) {inSR=true;eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
-                   } 
+                    }
              }
                    
          }
+          
+           for(int i=0;i<3;i++){
+              for(int j=0;j<3;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
+          
+          for(int i=17;i<20;i++){
+              for(int j=12;j<15;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
           
           
           if(inSR==true) return;
@@ -1001,21 +1067,37 @@ public void exploreAgain(){
           
           // sensor 5 right LR
           for(int i=0;i<sensor5.size();i++){  
+              
              int[] t=(int[]) sensor5.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) break;
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
-                       if(temp==0) temp=2;
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
+                        if(temp==0) temp=2;
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       
+                       count++;
                        if(temp==3) {eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
-                   } 
+                    }
              }
                    
          }
+      
+        
+          
+             for(int i=0;i<3;i++){
+              for(int j=0;j<3;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
+          
+          for(int i=17;i<20;i++){
+              for(int j=12;j<15;j++){
+                  if(curMap[i][j]!=1)
+                    m.updateCell(curMap,i,j,2);
+              }
+          }
       
          
      
@@ -1057,13 +1139,7 @@ public void exploreAgain(){
      
      }
      
-   public boolean isVisited(){
-         for(int i=0;i<visited.size();i++){
-           int[] t=(int[])visited.get(i);
-           if(t[0]==curPos[0]&&t[1]==curPos[1]&&t[2]==d[0]&&t[3]==d[1]) return true;
-         }
-         return false;
-     }
+ 
      
   //***************************Testing purpose***********************************************     
      public void printAlign(){
@@ -1098,86 +1174,6 @@ public void exploreAgain(){
 
 
 
-  //************************************************************************** 
- 
- public boolean unknownWithinSensor(){
-     
-     //sensor1
-     for(int i=0;i<sensor1.size();i++){
-             int[] t=(int[]) sensor1.get(i);
-             if(withinBoundary(curPos[0]+t[0],curPos[1]+t[1])){
-                   
-                   if(curMap[curPos[0]+t[0]][curPos[1]+t[1]]==0) 
-                      return true;      
-             }
-                   
-      }
-     
-     //sensor2
-     for(int i=0;i<sensor2.size();i++){
-             int[] t=(int[]) sensor2.get(i);
-             if(withinBoundary(curPos[0]+t[0],curPos[1]+t[1])){
-                   
-                   if(curMap[curPos[0]+t[0]][curPos[1]+t[1]]==0) 
-                      return true;      
-             }
-                   
-      }
-     
-     
-     //sensor3
-     for(int i=0;i<sensor3.size();i++){
-             int[] t=(int[]) sensor3.get(i);
-             if(withinBoundary(curPos[0]+t[0],curPos[1]+t[1])){
-                   
-                   if(curMap[curPos[0]+t[0]][curPos[1]+t[1]]==0) 
-                      return true;      
-             }
-                   
-      }
-     
-     
-     //sensor4
-     for(int i=0;i<sensor4.size();i++){
-             int[] t=(int[]) sensor4.get(i);
-             if(withinBoundary(curPos[0]+t[0],curPos[1]+t[1])){
-                   
-                   if(curMap[curPos[0]+t[0]][curPos[1]+t[1]]==0) 
-                      return true;      
-             }
-                   
-      }
-     
-     //sensor5  LR
-     for(int i=0;i<sensor5.size();i++){
-             int[] t=(int[]) sensor5.get(i);
-             if(withinBoundary(curPos[0]+t[0],curPos[1]+t[1])){
-                   
-                   if(curMap[curPos[0]+t[0]][curPos[1]+t[1]]==0) 
-                      return true;      
-             }
-                   
-      }
-     
-     //sensor6  SR
-     for(int i=0;i<sensor6.size();i++){
-             int[] t=(int[]) sensor6.get(i);
-             if(withinBoundary(curPos[0]+t[0],curPos[1]+t[1])){
-                   
-                   if(curMap[curPos[0]+t[0]][curPos[1]+t[1]]==0) 
-                      return true;      
-             }
-                   
-      }
-     
-     return false;
-     
-     
-     
-     
-     
- }
-
  
    //************************************************************************** 
   
@@ -1207,6 +1203,7 @@ public void exploreAgain(){
                if(canAlignFront()&&canAlignLeft()){
                    
                      turnLeft();
+                     
                          adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
@@ -1214,6 +1211,7 @@ public void exploreAgain(){
                       doAlignment();
                      
                       turnRight();
+                     
                           adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
@@ -1241,13 +1239,14 @@ public void exploreAgain(){
              
                  if(!canAlignFront()&&canAlignLeft()){
                       turnLeft();
-                         adjustSensor();
+                     
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
                          
                       doAlignment();
                        
                       turnRight();
+                    
                           adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
@@ -1279,8 +1278,8 @@ public void exploreAgain(){
                 
             try{Thread.sleep(delay);}catch(Exception e){}
                 
-                //m.updateRobPos(pos[0],pos[1],cPos[0],cPos[1]);
-                m.updateRobPos(oldPos[0],oldPos[1],pos[0],pos[1]);
+                
+                m.updateRobPos2(oldPos[0],oldPos[1],pos[0],pos[1],d[0],d[1]);
      
       
                 dfsToStart(pos);      
@@ -1301,7 +1300,7 @@ public void exploreAgain(){
                 int[] tpos=(int[])path2.remove(path2.size()-1);
                 generateCommandDFS(d[0],d[1],tpos[0]-pos[0],tpos[1]-pos[1]);
             
-                m.updateRobPos(temp[0],temp[1],pos[0],pos[1]);
+                m.updateRobPos2(temp[0],temp[1],pos[0],pos[1],d[0],d[1]);
                         
             }
         }//end of while loop
@@ -1345,6 +1344,7 @@ public void exploreAgain(){
                if(canAlignFront()&&canAlignLeft()){
                    
                      turnLeft();
+                     
                          adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
@@ -1352,6 +1352,7 @@ public void exploreAgain(){
                       doAlignment();
                      
                       turnRight();
+                      
                           adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
@@ -1380,6 +1381,7 @@ public void exploreAgain(){
              
                  if(!canAlignFront()&&canAlignLeft()){
                       turnLeft();
+                      
                          adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
@@ -1387,6 +1389,7 @@ public void exploreAgain(){
                       doAlignment();
                        
                       turnRight();
+                      
                           adjustSensor();
                          exploreOccupiedSpace(this.curPos);
                          updateMap(this.curPos);
@@ -1420,7 +1423,7 @@ public void exploreAgain(){
             try{Thread.sleep(delay);}catch(Exception e){}
                 
               
-               m.updateRobPos(oldPos[0],oldPos[1],pos[0],pos[1]);
+               m.updateRobPos2(oldPos[0],oldPos[1],pos[0],pos[1],d[0],d[1]);
                
                
                 dfs(pos);      
@@ -1441,7 +1444,7 @@ public void exploreAgain(){
                 int[] tpos=(int[])path.remove(path.size()-1);
                 generateCommandDFS(d[0],d[1],tpos[0]-pos[0],tpos[1]-pos[1]);
               
-                m.updateRobPos(temp[0],temp[1],pos[0],pos[1]);
+                m.updateRobPos2(temp[0],temp[1],pos[0],pos[1],d[0],d[1]);
                         
             }
         }//end of while loop
@@ -1451,7 +1454,7 @@ public void exploreAgain(){
         //System.out.println("count "+count);
    
    }
-     //************************************************************************** 
+  //************************************************************************** 
    
       public void generateCommandDFS(int dx,int dy,int wx,int wy){
 
@@ -1459,29 +1462,25 @@ public void exploreAgain(){
             if(wx==1&&wy==0){ 
                // System.out.println("W|");
                     moveForward();
-                    //adjustSensor();
-                    //exploreOccupiedSpace(this.curPos);
-                    //updateMap(this.curPos);
+     
             }
             else if(wx==0&&wy==1)  {
                // System.out.println("D|");
                  turnRight();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
                 // System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-//            
-            
+        
             }
             else if(wx==-1&&wy==0) { 
                 
                 //System.out.println("D");
                  turnRight();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
@@ -1489,6 +1488,7 @@ public void exploreAgain(){
                  
                 //System.out.println("D|");
                  turnRight();
+                 
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
@@ -1496,27 +1496,20 @@ public void exploreAgain(){
                 
                 //System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-            
-            
-            
+        
             
             }
             else  {
                 //System.out.println("A"); 
                  turnLeft();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
                  //System.out.println("W|"); 
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-//            
+            
             
             }  //0 -1
         
@@ -1527,59 +1520,55 @@ public void exploreAgain(){
                 
                // System.out.println("A|");
                  turnLeft();
+                 
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                //  System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-//            
+            
             
             }
             else if(wx==0&&wy==1)  {
                // System.out.println("W|");
                 moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-//            
+          
             }
             else if(wx==-1&&wy==0)  {
                // System.out.println("D|");
                 turnRight();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                 // System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-            
+                
             }
             else  {
                // System.out.println("D|");
                 turnRight();
+               
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                 // System.out.println("D|");
                 turnRight();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
             
+                 try{Thread.sleep(delay);}catch(Exception e){}
                  //System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-//            
+            
             } //0 -1
         
         }
@@ -1588,60 +1577,55 @@ public void exploreAgain(){
             if(wx==1&&wy==0){ 
                // System.out.println("A|");
                 turnLeft();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                  // System.out.println("A|");
                  turnLeft();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
+                 try{Thread.sleep(delay);}catch(Exception e){}
                  
                 //  System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
+              
             }
             else if(wx==0&&wy==1)  {
                 
                 //System.out.println("A|");
                 turnLeft();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                 // System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-//                 
-                 
-            
+        
             
             }
             else if(wx==-1&&wy==0)  {
                 //System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-            }
+          }
             else  {
                // System.out.println("D|");
                 turnRight();
+               
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                 // System.out.println("W|");
                 moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-            
+           
             
             }  //0 -1
         
@@ -1650,56 +1634,55 @@ public void exploreAgain(){
             if(wx==1&&wy==0) {
                // System.out.println("D|");
                 turnRight();
+               
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                //  System.out.println("W|");
                 moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
-//            
+     
             }
             else if(wx==0&&wy==1)  {
                 // System.out.println("D|");
                 turnRight();
+               
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                 // System.out.println("D|");
                 turnRight();
+                
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
+                 try{Thread.sleep(delay);}catch(Exception e){}
             
                  //System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
+
             
             }
             else if(wx==-1&&wy==0)  {
                 //System.out.println("A|");
                  turnLeft();
+                 
                  adjustSensor();
                  exploreOccupiedSpace(this.curPos);
                  updateMap(this.curPos);
                  
+                 try{Thread.sleep(delay);}catch(Exception e){}
                  //System.out.println("W|");
                  moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
+
             }
             else  {
                 //System.out.println("W|");
                 moveForward();
-//                 adjustSensor();
-//                 exploreOccupiedSpace(this.curPos);
-//                 updateMap(this.curPos);
+
             } //0 -1
         
         }

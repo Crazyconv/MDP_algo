@@ -323,6 +323,8 @@ public class WallSticking4 {
                   try{Thread.sleep(delay);}catch(Exception e){}
                      int ox=curPos[0];
                      int oy=curPos[1];
+                     
+                     
                      moveForward();
                      cycle_counter++;
                      
@@ -885,22 +887,18 @@ public void exploreAgain(){
          for(int i=0;i<sensor1.size();i++){
              int[] t=(int[]) sensor1.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { 
+                     if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { 
                        break;}
                    
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
-                   
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
-                       if(temp==0) temp=2;
-                       
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){    
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
                       
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       
+                       count++;
                      
                        if(temp==3) { eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]);  break;};
-                   }  
+                    } 
              }
                    
          }
@@ -909,7 +907,7 @@ public void exploreAgain(){
           for(int i=0;i<sensor2.size();i++){
              int[] t=(int[]) sensor2.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
+//                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
                    
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
@@ -929,7 +927,7 @@ public void exploreAgain(){
           for(int i=0;i<sensor3.size();i++){
              int[] t=(int[]) sensor3.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { break;}
+//                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { break;}
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
                    
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
@@ -950,7 +948,7 @@ public void exploreAgain(){
 
              int[] t=(int[]) sensor4.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
+//                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {  break;}
                    if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++;
                    
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
@@ -970,18 +968,18 @@ public void exploreAgain(){
           for(int i=0;i<sensor6.size();i++){  
              int[] t=(int[]) sensor6.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) {inSR=true;break;}
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                     if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { 
+                       break;}
                    
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
-                       if(temp==0) temp=2;
-                       
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
-                       m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
                       
-                       if(temp==3) {inSR=true;eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
-                   } 
+                       m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
+                       count++;
+                     
+                       if(temp==3) { eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]);  break;};
+                    } 
              }
                    
          }
@@ -994,18 +992,18 @@ public void exploreAgain(){
           for(int i=0;i<sensor5.size();i++){  
              int[] t=(int[]) sensor5.get(i);
              if(withinBoundary(pos[0]+t[0],pos[1]+t[1])){
-                  if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) break;
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0) count++; 
+                     if(curMap[pos[0]+t[0]][pos[1]+t[1]]==3) { 
+                       break;}
                    
+                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]==0){ 
                        int temp=occupancy[pos[0]+t[0]][pos[1]+t[1]];
-                       if(temp==0) temp=2;
-                       
-                   if(curMap[pos[0]+t[0]][pos[1]+t[1]]!=1){
                        curMap[pos[0]+t[0]][pos[1]+t[1]]=temp; 
+                      
                        m.updateCell(curMap,pos[0]+t[0],pos[1]+t[1],temp);
-                       
-                       if(temp==3) {eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]); break;};
-                   } 
+                       count++;
+                     
+                       if(temp==3) { eOM.extendObstacle(pos[0]+t[0], pos[1]+t[1]);  break;};
+                    } 
              }
                    
          }

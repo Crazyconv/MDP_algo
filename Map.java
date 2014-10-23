@@ -69,6 +69,12 @@ public class Map
         this.g.updateRobPos(ox,oy,nx,ny);
     }
     
+    
+     public void updateRobPos2(int ox, int oy, int nx, int ny, int dx,int dy){
+       
+        this.g.updateRobPos2(ox,oy,nx,ny,dx,dy);
+    }
+    
   //#################################################################################     
    public void paintSPath1(ArrayList sp){
         this.g.paintSPath1(sp);
@@ -307,6 +313,32 @@ class WinGrid extends JFrame
             }
 
          }
+       
+        
+    }
+    
+    
+     
+    public void updateRobPos2(int ox, int oy,int nx, int ny,int dx, int dy){
+        //draw a dot to represent robot
+        //Graphics gp=chessboard.getGraphics();
+        for(int i=-1;i<2;i++){
+            for(int j=-1;j<2;j++){
+            cells1[length-1-ox-i][oy+j].setBackground (Color.yellow);
+            }
+
+        }
+        
+         for(int i=-1;i<2;i++){
+            for(int j=-1;j<2;j++){
+            cells1[length-1-nx-i][ny+j].setBackground (Color.MAGENTA);
+            }
+
+         }
+         
+         cells1[length-1-nx-dx][ny+dy].setBackground (Color.WHITE);
+         
+         
        
         
     }
