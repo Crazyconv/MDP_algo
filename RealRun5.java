@@ -62,6 +62,10 @@ public class RealRun5 {
     
     Client client;
     
+    MapDescriptor md1=new MapDescriptor();
+    int[][] tCM1; //=new int[20][15];
+    ArrayList<String> ss=new ArrayList<String>(); //Map Descriptor Strings 
+    
    // 0 for unexplored; 1 for visited; 2 for empty space but not visited ; 3 for obstacle; 5 for goal
     
      public  RealRun5(int[] strP,double coverage_limit,int[][] occupancy,long time_limit){
@@ -132,7 +136,7 @@ public class RealRun5 {
                 curMap[i][j]=2;   //5 for Goal
         }
              
-                
+     
         
        
     }
@@ -141,9 +145,9 @@ public class RealRun5 {
          
          t1 = System.currentTimeMillis();
          
-       MapDescriptor md1=new MapDescriptor();
-         int[][] tCM1=new int[20][15];
-         ArrayList<String> ss=new ArrayList<String>(); //Map Descriptor Strings
+         // MapDescriptor md1=new MapDescriptor();
+         // int[][] tCM1=new int[20][15];
+         // ArrayList<String> ss=new ArrayList<String>(); //Map Descriptor Strings
          
          
          dfs(curPos);
@@ -455,7 +459,17 @@ public class RealRun5 {
          if(sp2.size()>1){
              int[] t2=(int[])sp2.get(1);
              int[] correctDirec=new int[]{t2[0]-curPos[0],t2[1]-curPos[1]};
-             while(d[0]!=correctDirec[0]||d[1]!=correctDirec[1]) {turnRight();}
+             while(d[0]!=correctDirec[0]||d[1]!=correctDirec[1]) {
+                turnRight();
+                adjustSensor();
+                exploreOccupiedSpace(this.curPos);
+                updateMap(this.curPos);
+             }
+             
+             tCM1=md1.transCurMap(this.curMap);
+             ss=md1.twoDtoStrings(tCM1);
+             System.out.println(ss.get(0));
+             System.out.println(ss.get(1));
              
                  //printShortestPath(sp2);
               System.out.println("command sent to robot: "+mySP.finalPath);
@@ -964,12 +978,14 @@ public void newExplorationToGoal(){
 
                 sensor2.add(new int[]{2,-1});
                 sensor2.add(new int[]{3,-1});
+                sensor2.add(new int[]{4,-1});
 
                 sensor3.add(new int[]{2,0});
                // sensor3.add(new int[]{3,0});
 
                 sensor4.add(new int[]{2,1});
                 sensor4.add(new int[]{3,1});
+                sensor4.add(new int[]{4,1});
 
                 sensor6.add(new int[]{-1,2});
                 sensor6.add(new int[]{-1,3});
@@ -990,12 +1006,14 @@ public void newExplorationToGoal(){
 
                 sensor2.add(new int[]{-1,-2});
                 sensor2.add(new int[]{-1,-3});
+                sensor2.add(new int[]{-1,-4});
 
                 sensor3.add(new int[]{0,-2});
                 //sensor3.add(new int[]{0,-3});
 
                 sensor4.add(new int[]{1,-2});
                 sensor4.add(new int[]{1,-3});
+                sensor4.add(new int[]{1,-4});
 
                 sensor6.add(new int[]{2,1});
                 sensor6.add(new int[]{3,1});
@@ -1014,12 +1032,14 @@ public void newExplorationToGoal(){
 
                 sensor2.add(new int[]{-2,1});
                 sensor2.add(new int[]{-3,1});
+                sensor2.add(new int[]{-4,1});
 
                 sensor3.add(new int[]{-2,0});
                 //sensor3.add(new int[]{-3,0});
 
                 sensor4.add(new int[]{-2,-1});
                 sensor4.add(new int[]{-3,-1});
+                sensor4.add(new int[]{-4,-1});
 
                 sensor6.add(new int[]{1,-2});
                 sensor6.add(new int[]{1,-3});
@@ -1036,12 +1056,14 @@ public void newExplorationToGoal(){
 
                 sensor2.add(new int[]{1,2});
                 sensor2.add(new int[]{1,3});
+                sensor2.add(new int[]{1,4});
 
                 sensor3.add(new int[]{0,2});
                 //sensor3.add(new int[]{0,3});
 
                 sensor4.add(new int[]{-1,2});
                 sensor4.add(new int[]{-1,3});
+                sensor4.add(new int[]{-1,4});
 
                 sensor6.add(new int[]{-2,-1});
                 sensor6.add(new int[]{-3,-1});

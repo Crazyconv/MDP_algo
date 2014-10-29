@@ -836,16 +836,19 @@ public class WallSticking6 {
         if(d[0]==1&&d[1]==0){  //N
         
                 sensor1.add(new int[]{1,-2}); 
-                sensor1.add(new int[]{1,-3}); 
+                sensor1.add(new int[]{1,-3});
+                sensor1.add(new int[]{1,-4}); 
 
                 sensor2.add(new int[]{2,-1});
                 sensor2.add(new int[]{3,-1});
+                sensor2.add(new int[]{4,-1});
 
                 sensor3.add(new int[]{2,0});
                 //sensor3.add(new int[]{3,0});
 
                 sensor4.add(new int[]{2,1});
                 sensor4.add(new int[]{3,1});
+                sensor4.add(new int[]{4,1});
 
                 sensor6.add(new int[]{-1,2});
                 sensor6.add(new int[]{-1,3});
@@ -863,15 +866,18 @@ public class WallSticking6 {
                 
                 sensor1.add(new int[]{-2,-1}); 
                 sensor1.add(new int[]{-3,-1}); 
+                sensor1.add(new int[]{-4,-1});
 
                 sensor2.add(new int[]{-1,-2});
                 sensor2.add(new int[]{-1,-3});
+                sensor2.add(new int[]{-1,-4});
 
                 sensor3.add(new int[]{0,-2});
                 //sensor3.add(new int[]{0,-3});
 
                 sensor4.add(new int[]{1,-2});
                 sensor4.add(new int[]{1,-3});
+                sensor4.add(new int[]{1,-4});
 
                 sensor6.add(new int[]{2,1});
                 sensor6.add(new int[]{3,1});
@@ -886,16 +892,19 @@ public class WallSticking6 {
         
         else if(d[0]==-1&&d[1]==0){  //S
                 sensor1.add(new int[]{-1,2}); 
-                sensor1.add(new int[]{-1,3}); 
+                sensor1.add(new int[]{-1,3});
+                sensor1.add(new int[]{-1,4}); 
 
                 sensor2.add(new int[]{-2,1});
                 sensor2.add(new int[]{-3,1});
+                sensor2.add(new int[]{1,-3});
 
                 sensor3.add(new int[]{-2,0});
                 //sensor3.add(new int[]{-3,0});
 
                 sensor4.add(new int[]{-2,-1});
                 sensor4.add(new int[]{-3,-1});
+                sensor4.add(new int[]{-4,-1});
 
                 sensor6.add(new int[]{1,-2});
                 sensor6.add(new int[]{1,-3});
@@ -909,15 +918,18 @@ public class WallSticking6 {
         else{   //E
                 sensor1.add(new int[]{2,1}); 
                 sensor1.add(new int[]{3,1}); 
+                sensor1.add(new int[]{4,1});
 
                 sensor2.add(new int[]{1,2});
                 sensor2.add(new int[]{1,3});
+                sensor2.add(new int[]{1,4});
 
                 sensor3.add(new int[]{0,2});
                 //sensor3.add(new int[]{0,3});
 
                 sensor4.add(new int[]{-1,2});
                 sensor4.add(new int[]{-1,3});
+                sensor4.add(new int[]{-1,4});
 
                 sensor6.add(new int[]{-2,-1});
                 sensor6.add(new int[]{-3,-1});

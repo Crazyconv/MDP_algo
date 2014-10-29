@@ -732,7 +732,7 @@ public class Testing {
                speed=20;
                
                
-               WallSticking6 ws6=new WallSticking6(strP,coverage_limit,sample3,time_limit,speed);
+               WallSticking6 ws6=new WallSticking6(strP,coverage_limit,sample2,time_limit,speed);
                 
                 ws6.start_Exploration(mustFindGoal);
                 System.out.println("Exploration complete");
