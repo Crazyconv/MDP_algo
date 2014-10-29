@@ -217,6 +217,7 @@ public class WallSticking5 {
                    
                     System.out.println("#########Total count= "+count);
                    found_start++; 
+                   System.out.println("#########found_start= "+found_start);
                     tCM1=md1.transCurMap(this.curMap);
                     ss=md1.twoDtoStrings(tCM1);
                     System.out.println(ss.get(0));
@@ -232,7 +233,7 @@ public class WallSticking5 {
                    
                }
                
-               if(found_start>=3) break;
+               if(found_start>=5) break;
               
                
                if(!mustFindGoal&&count>=300*coverage_limit){break;}
@@ -397,8 +398,8 @@ public class WallSticking5 {
          
          if(curPos[0]!=1||curPos[1]!=1){ 
              //sensorData1=client.read();
-             System.out.println("$$$$$$$$$$received from sensor: ");
-         
+             
+         System.out.println("here");
               System.out.println("X|");
          
              dfsToStart(curPos);

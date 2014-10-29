@@ -2,7 +2,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.math.*;
 
-public class RealRun3 {
+public class RealRun5 {
     int[] sPos=new int[2];
     
    
@@ -25,7 +25,7 @@ public class RealRun3 {
     ArrayList sensor6=new ArrayList();
     
     ArrayList direc=new ArrayList();
-    ArrayList direc2=new ArrayList();
+    
     
     ArrayList visited;
 
@@ -64,7 +64,7 @@ public class RealRun3 {
     
    // 0 for unexplored; 1 for visited; 2 for empty space but not visited ; 3 for obstacle; 5 for goal
     
-     public  RealRun3(int[] strP,double coverage_limit,int[][] occupancy,long time_limit){
+     public  RealRun5(int[] strP,double coverage_limit,int[][] occupancy,long time_limit){
         
         this.client=new Client();
         client.setUp("192.168.22.1",6000);  //host, port
@@ -78,7 +78,7 @@ public class RealRun3 {
         this.curPos=sPos;
        
         
-        d=new int[]{0,-1};
+        d=new int[]{0,1};
         
        
         
@@ -91,17 +91,14 @@ public class RealRun3 {
         
         this.occupancy=occupancy;
         
-        direc.add(new int[]{0,-1});  //W
-        direc.add(new int[]{1,0});   //N
+        
         direc.add(new int[]{0,1});   //E
         direc.add(new int[]{-1,0});  //S
-        
-        direc2.add(new int[]{0,-1});  //W
-        direc2.add(new int[]{-1,-0});   //S
-        direc2.add(new int[]{1,0});   //N
-        direc2.add(new int[]{0,1});  //E
-                
-        
+        direc.add(new int[]{0,-1});  //W
+        direc.add(new int[]{1,0});   //N
+         
+                                     
+       
        
         
         this.count=18;  //count explored
@@ -139,25 +136,25 @@ public class RealRun3 {
         
        
     }
- public void start_Exploration(boolean mustFindGoal){
+ 
+  public void start_Exploration(boolean mustFindGoal){
          
-        
          t1 = System.currentTimeMillis();
          
-         dfs(curPos);
-         
-         MapDescriptor md1=new MapDescriptor();
+       MapDescriptor md1=new MapDescriptor();
          int[][] tCM1=new int[20][15];
          ArrayList<String> ss=new ArrayList<String>(); //Map Descriptor Strings
+         
+         
+         dfs(curPos);
          
          
          System.out.println("dfs done");
          System.out.println("count "+count);
          
-        System.out.println("*******current pos: "+curPos[0]+" "+curPos[1]);
-        System.out.println("*******current direc: "+d[0]+" "+d[1]);
+        
          
-         printMap(curMap);
+         //printMap(curMap);
          for(int i=0;i<20;i++){
                     for(int j=0;j<15;j++){
                         if(curMap[i][j]==1){
@@ -166,16 +163,13 @@ public class RealRun3 {
                     }
                 
           }
-         printMap(curMap);
-         
-          if(canAlignFront()){
-            doAlignment();
-         }
-		         
+         //printMap(curMap);
+        
          
          int circle=0;
 
          this.stopP=new int[]{curPos[0],curPos[1]}; 
+         
          adjustSensor();
          exploreOccupiedSpace(this.curPos);
          updateMap(this.curPos);
@@ -183,36 +177,32 @@ public class RealRun3 {
          adjustSensor();
          exploreOccupiedSpace(this.curPos);
          updateMap(this.curPos);
-      
-               
-          
-        while(count<300*coverage_limit||found_goal==0||found_start==0){
+   
         
-              
+        
+       while(curPos[0]!=1||curPos[1]!=1||found_goal==0||found_start==0){
+        
              
-             if(curPos[0]==stopP[0]&&curPos[1]==stopP[1]&&isLeftWall(curPos) ){
-                 circle++;
-                 if(circle==2) {
-                     //System.out.println("e%%%%%%%%%%%%%%%%explore a circle%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-                     break;}
-                 
-             }
               
                t2=System.currentTimeMillis();
              
-               if(t2-t1>=time_limit){
-                   //System.out.println("Exceeed time limit "+(t2-t1)+"ms");
-                   break;}
+               if(t2-t1>=time_limit){break;}
              
                System.out.println("*******current pos: "+curPos[0]+" "+curPos[1]);
                System.out.println("*******current direc: "+d[0]+" "+d[1]);
-               //System. out.println("******count="+count);
-               //System. out.println("********found goal="+found_goal);
+              
                
-               if(curPos[0]==18&&curPos[1]==13){found_goal++; if(count>=300*coverage_limit&&found_start!=0) break;}
+               if(curPos[0]==18&&curPos[1]==13){
+                  found_goal++; 
+                
+               }
                
                if(curPos[0]==1&&curPos[1]==1){
+                   
                    found_start++; 
+                    System.out.println("#########Total count= "+count);
+                   
+                   System.out.println("#########found_start= "+found_start);
                     tCM1=md1.transCurMap(this.curMap);
                     ss=md1.twoDtoStrings(tCM1);
                     System.out.println(ss.get(0));
@@ -221,18 +211,11 @@ public class RealRun3 {
                     //ShortestPath mySP6 = new ShortestPath(new int[]{1,1},new int[]{18,13} ,curMap);
                     //ArrayList sp6=mySP6.searchShortestPath();
                     
-                    if(count>=300*coverage_limit&&found_goal!=0) break;
-                    
-                    
-                  
+                    if(found_goal!=0) break;   
                    
                }
                
                if(found_start>=5) break;
-              
-               
-               if(!mustFindGoal&&count>=300*coverage_limit){break;}
-             
                
             //*****************Alignment********************************************
                if((sensorAlignFront||canAlignFront())&&canAlignLeft()){
@@ -385,29 +368,26 @@ public class RealRun3 {
          System.out.println("Total count= "+count);
         
          
-         //if(coverage_limit==1&&count<300&&(t2-t1)<time_limit) {System.out.println("explore again");exploreAgain();}
-         //System.out.println("Goal found= "+found);
-         //System.out.println("stop at: "+curPos[0]+" "+curPos[1]);
-         //printMap(curMap);
+         
          String sensorData1;
          
-         if(curPos[0]!=1||curPos[1]!=1){ 
-            
-             client.write("X|");
-         
-             dfsToStart(curPos);
-            sensorData1=client.read();
-            System.out.println("$$$$$$$$$$received from sensor: "+sensorData1);
-         
-             for(int m=0;m<20;m++){
-                                        for(int n=0;n<15;n++){
-                                            if(curMap[m][n]==1){
-                                                curMap[m][n]=2;
-                                            }
-                                        }
-
-             }
-         }
+//         if(curPos[0]!=1||curPos[1]!=1){ 
+//            
+//             client.write("X|");
+//         
+//             dfsToStart(curPos);
+//            sensorData1=client.read();
+//            System.out.println("$$$$$$$$$$received from sensor: "+sensorData1);
+//         
+//             for(int m=0;m<20;m++){
+//                                        for(int n=0;n<15;n++){
+//                                            if(curMap[m][n]==1){
+//                                                curMap[m][n]=2;
+//                                            }
+//                                        }
+//
+//             }
+//         }
          
          tCM1=md1.transCurMap(this.curMap);
                     ss=md1.twoDtoStrings(tCM1);
@@ -1445,149 +1425,7 @@ public void newExplorationToGoal(){
         
 
 
-
-  //************************************************************************** 
-
- 
- 
- public void dfsToStart(int[] pos){
-       // int[] cPos=new int[2];  //next position
-      
-        
-        if(pos[0]==1&&pos[1]==1) backToStart=true;
-          
-        
-        
-        
-        
-        
-        while(!backToStart){
-            
-             t2=System.currentTimeMillis(); 
-             if(t2-t1>=time_limit){System.out.println("Exceeed time limit "+(t2-t1)+"ms");break;}
-             //System.out.println("dfsAgain:   count "+count);
-   
-            
-             //System.out.println("*******current pos: "+pos[0]+" "+pos[1]);
-             //System.out.println("*******current direc: "+d[0]+" "+d[1]);
-             adjustSensor();
-             exploreOccupiedSpaceDFS(pos);
-             updateMap(this.curPos);  
-             
-             
-                //*****************Alignment********************************************
-               if(canAlignFront()&&canAlignLeft()){
-                   
-                     turnLeft();
-                         adjustSensor();
-                         exploreOccupiedSpace(this.curPos);
-                         updateMap(this.curPos);
-                         
-                      doAlignment();
-                     
-                      turnRight();
-                          adjustSensor();
-                         exploreOccupiedSpace(this.curPos);
-                         updateMap(this.curPos);
-                      
-                      
-                       
-                       
-                       doAlignment();
-                      align.add(new int[]{curPos[0],curPos[1]});
-                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
-               
-               }
-               
-               
-               
-                 if(canAlignFront()&&!canAlignLeft()){
-                     doAlignment();
-                         
-                       //cycle_counter=0;
-                       
-                      align.add(new int[]{curPos[0],curPos[1]});
-                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
-                     
-                 }
-                 
-             
-                 if(!canAlignFront()&&canAlignLeft()){
-                      turnLeft();
-                         adjustSensor();
-                         exploreOccupiedSpace(this.curPos);
-                         updateMap(this.curPos);
-                         
-                      doAlignment();
-                       
-                      turnRight();
-                          adjustSensor();
-                         exploreOccupiedSpace(this.curPos);
-                         updateMap(this.curPos);
-                      
-                      
-                       
-                      align.add(new int[]{curPos[0],curPos[1]});
-                      m.g.cells2[19-curPos[0]][curPos[1]].setBackground(Color.ORANGE);
-                     
-                 }
-
-             //if(unknownWithinSensor()) updateMap(this.curPos);  
-            // printMap(curMap);
-        //WSNE        
-            for(int i=0;i<4;i++){
-                int[] w=(int[]) direc2.get(i);
-
-                if((pos[1]<=1&&i==0)||(pos[0]>=18&&i==2)||(pos[1]>=13&&i==3)||(pos[0]<=1&&i==1)) continue;   
-                // don't go into wall direction
-                if(curMap[pos[0]+w[0]][pos[1]+w[1]]==1||curMap[pos[0]+w[0]][pos[1]+w[1]]==0) continue;
-                
-                //if visited or unknown, don't go there
-                if(this.eOM.isMovable(pos[0]+w[0],pos[1]+w[1])==false) continue;
-                //If obstacle or obstacle boundary, don't go there
-                
-                path2.add(new int[]{pos[0],pos[1]});  
-                int[] oldPos=new int[]{pos[0],pos[1]};  
-                
-                generateCommandDFS(d[0],d[1],w[0],w[1]);
-            
-                
-            //try{Thread.sleep(delay);}catch(Exception e){}
-                
-                //m.updateRobPos(pos[0],pos[1],cPos[0],cPos[1]);
-                m.updateRobPos2(oldPos[0],oldPos[1],pos[0],pos[1],d[0],d[1]);
-                
-             
-                dfsToStart(pos);      
-                if(out2==true) return;
-
-
-            }//end of for loop
-           
-            if(out2==false){
-                
-                
-                int[] temp=new int[2];
-                temp[0]=pos[0];
-                temp[1]=pos[1];
-                        
-             //try{Thread.sleep(delay);}catch(Exception e){}
-                if(path.size()==0){System.out.println("Error"); System.exit(0);}
-                int[] tpos=(int[])path2.remove(path2.size()-1);
-                generateCommandDFS(d[0],d[1],tpos[0]-pos[0],tpos[1]-pos[1]);
-            
-                m.updateRobPos2(temp[0],temp[1],pos[0],pos[1],d[0],d[1]);
-                        
-            }
-        }//end of while loop
- 
-        out2=true;
-        curPos=pos;
-        //System.out.println("count "+count);
-   
-   }
- 
- 
+//*******************************************************************************
  
  
    
@@ -1675,11 +1513,11 @@ public void newExplorationToGoal(){
                      
                  }
 
-        //WNES        
+        //ESWN        
             for(int i=0;i<4;i++){
                 int[] w=(int[]) direc.get(i);
 
-                if((pos[1]<=1&&i==0)||(pos[0]>=18&&i==1)||(pos[1]>=13&&i==2)||(pos[0]<=1&&i==3)) continue;   
+                if((pos[1]<=1&&i==2)||(pos[0]>=18&&i==3)||(pos[1]>=13&&i==0)||(pos[0]<=1&&i==1)) continue;   
                 // don't go into wall direction
                 if(curMap[pos[0]+w[0]][pos[1]+w[1]]==1||curMap[pos[0]+w[0]][pos[1]+w[1]]==0) continue;
                 
@@ -1941,6 +1779,8 @@ public void newExplorationToGoal(){
  
  
 }
+
+
 
 
 

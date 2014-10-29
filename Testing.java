@@ -388,6 +388,8 @@ public class Testing {
         System.out.println("7: Simulate Real run ");
         System.out.println("9: Simulate Real run dfs to start: ");
         System.out.println("10: Real run dfs to start ");
+        System.out.println("14: New Algo:SWNE ");
+        System.out.println("15: New Algo:ESWN ");
 
 
         
@@ -604,7 +606,7 @@ public class Testing {
                time_limit=1000000000;
                mustFindGoal=true;
                
-                SimulateRealRun srr=new SimulateRealRun(strP,coverage_limit,occupancy3,time_limit);
+                SimulateRealRun srr=new SimulateRealRun(strP,coverage_limit,sample1,time_limit);
                 srr.start_Exploration(mustFindGoal);
                 System.out.println("Exploration complete");
                 
@@ -644,10 +646,10 @@ public class Testing {
                coverage_limit=1;
                time_limit=1000000000;
                mustFindGoal=true;
-               speed=20;
+               speed=4;
                
                
-               ws5=new WallSticking5(strP,coverage_limit,sample5,time_limit,speed);
+               ws5=new WallSticking5(strP,coverage_limit,sample4,time_limit,speed);
                 
                 ws5.start_Exploration(mustFindGoal);
                 System.out.println("Exploration complete");
@@ -718,7 +720,94 @@ public class Testing {
                 System.out.println(s.get(0));
                 System.out.println(s.get(1));
                
+                break; 
+                
+             case(12):  //dfs to south wall
+               
+              strP=new int[]{9,7};     //9,7 for sample3,  1 grid impossible to explore for sample3
+  
+               coverage_limit=1;
+               time_limit=1000000000;
+               mustFindGoal=true;
+               speed=20;
+               
+               
+               WallSticking6 ws6=new WallSticking6(strP,coverage_limit,sample3,time_limit,speed);
+                
+                ws6.start_Exploration(mustFindGoal);
+                System.out.println("Exploration complete");
+                
+                
+               // ws1.m.printAlign(ws.align);
+                ws6.printMap(ws6.curMap);
+             
+                
+                //map descriptor
+                tCM=md.transCurMap(ws6.curMap);
+                s=md.twoDtoStrings(tCM);
+                System.out.println(s.get(0));
+                System.out.println(s.get(1));
+                int[][] testMap3=md.transMap(s.get(0), s.get(1));
+                md.printMap(testMap3);
+                 
+                
+                
+                break;    
+                 
+            
+                
+             case 14:  //SWNE
+                
+                strP=new int[]{9,7};
+                
+                endP=new int[]{18,13};
+                
+                
+               coverage_limit=1;
+               time_limit=1000000000;
+               mustFindGoal=true;
+               
+               RealRun4 rr4=new RealRun4(strP,coverage_limit,occupancy7,time_limit);
+                rr4.start_Exploration(mustFindGoal);
+                System.out.println("Exploration complete");
+                
+                
+               
+                //map descriptor
+                tCM=md.transCurMap(rr4.curMap);
+                s=md.twoDtoStrings(tCM);
+                System.out.println(s.get(0));
+                System.out.println(s.get(1));
+               
                 break;     
+                 
+                 
+                 
+                   
+             case 15:  //ESWN
+                
+                strP=new int[]{9,7};
+                
+                endP=new int[]{18,13};
+                
+                
+               coverage_limit=1;
+               time_limit=1000000000;
+               mustFindGoal=true;
+               
+               RealRun5 rr5=new RealRun5(strP,coverage_limit,occupancy7,time_limit);
+                rr5.start_Exploration(mustFindGoal);
+                System.out.println("Exploration complete");
+                
+                
+               
+                //map descriptor
+                tCM=md.transCurMap(rr5.curMap);
+                s=md.twoDtoStrings(tCM);
+                System.out.println(s.get(0));
+                System.out.println(s.get(1));
+               
+                break;       
                 
             default:
                 System.out.println("Invalid input");

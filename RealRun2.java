@@ -67,7 +67,7 @@ public class RealRun2 {
      public  RealRun2(int[] strP,double coverage_limit,int[][] occupancy,long time_limit){
         
         this.client=new Client();
-        client.setUp("192.168.22.1",5000);  //host, port
+        client.setUp("192.168.22.1",6000);  //host, port
         
         
         this.coverage_limit=coverage_limit;
@@ -228,7 +228,7 @@ public class RealRun2 {
                    
                }
                
-               if(found_start>=3) break;
+               if(found_start>=5) break;
               
                
                if(!mustFindGoal&&count>=300*coverage_limit){break;}
@@ -392,8 +392,7 @@ public class RealRun2 {
          String sensorData1;
          
          if(curPos[0]!=1||curPos[1]!=1){ 
-             sensorData1=client.read();
-             System.out.println("$$$$$$$$$$received from sensor: "+sensorData1);
+           
          
              client.write("X|");
          
@@ -410,6 +409,12 @@ public class RealRun2 {
 
              }
          }
+         
+         
+         tCM1=md1.transCurMap(this.curMap);
+                    ss=md1.twoDtoStrings(tCM1);
+                    System.out.println(ss.get(0));
+                    System.out.println(ss.get(1));
          
          while(!canAlignLeft()||!canAlignFront()){
              turnRight();
