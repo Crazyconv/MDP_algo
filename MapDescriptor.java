@@ -35,7 +35,8 @@ public class MapDescriptor {
           
           for(int i=0;i<curMap.length;i++){
             for(int j=0;j<curMap[0].length;j++){
-                if(curMap[i][j]!=0&&curMap[i][j]!=3){
+				//if(curMap[i][j]!=0&&curMap[i][j]!=3){
+				if(curMap[i][j]!=3){   
                     tCM[i][j]=1;
                     
                 }
