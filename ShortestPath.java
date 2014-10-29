@@ -172,7 +172,7 @@ exMap.transMap(maze);
 	            System.out.println("no path\n");
 	        }else if(error==0){
 	        	path(flood);
-	        	pathToString(shortestPath);
+	        	//pathToString(shortestPath);
 
 	        }//End If
 
@@ -245,152 +245,62 @@ exMap.transMap(maze);
 	                }
 
 	            }//End While
+	            pathToString(directions, 0, i);
 	            Collections.reverse(shortestPath);
 	}
 
-	public String pathToString(ArrayList path)
-	{	
-	
-		finalPath = "W0";
-		 for(int i=1; i<path.size()-1;i++)
-	        {
-	    	    int pBef[] = (int[])path.get(i-1);
-	        	int p[] = (int[])path.get(i);
-	        	int pAft[] = (int[])path.get(i+1);
-	        	if(pBef[0]==p[0] && p[0]!=pAft[0]){
-	        		char ch = finalPath.charAt(finalPath.length()-1);
-	        		if(Character.isDigit(ch))
-	        		{
-	        			if(ch=='9')
-	        				finalPath = finalPath.substring(0,finalPath.length()-1)+"10";
-	        			else
-	        				finalPath = finalPath.substring(0, finalPath.length()-1)+(char)(ch+1);
-	        		}
-	        		else
-                                {
-	        			finalPath = finalPath + "|W1";
-                                        countSteps++;
-                                }
-	        		if(p[0]<pAft[0])
-	        		{	
 
-	        			finalPath = finalPath + "|A";
-                                        countSteps++;
-	        		}
-	        		else
-	        		{
-	        			finalPath = finalPath + "|D";
-                                        countSteps++;
-	        		}
-	        		
-	        	}
-	        	else if((pBef[1]==p[1] && p[1]!=pAft[1]))
-	        	{
-	        		if(p[1]<pAft[1])
-	        		{
-	        			char ch = finalPath.charAt(finalPath.length()-1);
-	        			if(Character.isDigit(ch))
-	        			{
-	        				if(ch=='9')
-	        					finalPath = finalPath.substring(0,finalPath.length()-1)+"10";
-	        				else
-	        					finalPath = finalPath.substring(0, finalPath.length()-1)+(char)(ch+1);
-	        			}
-	        				else
-                                        {
-	        				finalPath = finalPath + "|W1";
-                                                countSteps++;
-                                        }
-	        				
-
-	        			finalPath = finalPath + "|D";
-                                        countSteps++;
-	        		}
-	        		else
-	        		{char ch = finalPath.charAt(finalPath.length()-1);
-	        			if(Character.isDigit(ch))
-	        			{
-	        				if(ch=='9')
-	        					finalPath = finalPath.substring(0, finalPath.length()-1)+"10";
-	        				else
-	        					finalPath = finalPath.substring(0, finalPath.length()-1)+(char)(ch+1);
-	        			}
-                                        else{
-	        				finalPath = finalPath + "|W1";
-                                                countSteps++;
-                                        }
-	        				
-
-	        			finalPath = finalPath + "|A";
-                                        countSteps++;
-	        		}
-	        		
-	        			
-	        	}
-	        	else
-	        	{
-	        		char ch = finalPath.charAt(finalPath.length()-1);
-	        		if(Character.isDigit(ch))
-	        		{
-	        				if(ch=='9')
-	        					finalPath = finalPath.substring(0, finalPath.length()-1)+"10";
-	        				else
-	        					finalPath = finalPath.substring(0, finalPath.length()-1)+(char)(ch+1);
-	        		}
-	        		else
-                                {
-	        			finalPath = finalPath + "|W1";
-                                        countSteps++;
-                                }
-	        				
-	        	}
-	        	
-	        		
-	        }
-	       	        
-	       char ch = finalPath.charAt(finalPath.length()-1);
-	       
-	       if(Character.isDigit(ch))
-	       {
-	    	   if(ch=='9')
-	    		   finalPath = finalPath.substring(0, finalPath.length()-1)+"10";
-	    	   else
-	    		   finalPath = finalPath.substring(0, finalPath.length()-1)+(char)(ch+1);
-	       }
-               else
-               {
-                   finalPath = finalPath +"|W1";
-                   countSteps++;
-               }
-	        
-
-	        				
-
-
-	       finalPath = finalPath + "|";
-               countSteps++;
-               finalSteps = "S"+countSteps;
-	       //System.out.println(finalPath);
-               //System.out.println(finalSteps);
-	       return finalPath;
-	}
-
-	}
+	public void pathToString (int directions[], int error, int i)
+	{
 	       
 	        // Print output in reverse order
-	      /* if(error == 0){
+		finalPath = "W0";
+	       if(error == 0){
 
-	            for(;i>=0;i--){
-	                if(directions[i]==1){
+	            for(;i>0;i--){
+	            	
+	            char ch = finalPath.charAt(finalPath.length()-1);
+	       
+
+	
+	            if(directions[i]==1 && directions[i-1] ==2 || directions[i]==3 && directions[i-1]==4 || directions[i]==2 && directions[i-1] == 3 || directions[i]==4 && directions[i-1]==1)
+	            {
+	            		finalPath = finalPath + "|A|W1";
+	            		countSteps+=2;
+	            }
+	            else if(directions[i]==1 && directions[i-1] ==4 || directions[i]==3 && directions[i-1]==2 || directions[i]==2 && directions[i-1] == 1 || directions[i]==4 && directions[i-1]==3)
+	            		{
+	            		 finalPath = finalPath + "|D|W1";
+	            		 countSteps+=2;
+	            		}
+	            		
+	            else if(Character.isDigit(ch))
+	            {
+	            	if(ch=='9')
+	            		finalPath = finalPath.substring(0, finalPath.length()-1)+"10";
+	            	else
+	            		finalPath = finalPath.substring(0, finalPath.length()-1)+(char)(ch+1);
+	            	countSteps++;
+	            }
+	            }
+	            
+
+	              /* if(directions[i]==1){
                             
 	                    System.out.println("North\n");
 	                }else if(directions[i]==2){
-	                    finalPath = finalPath + "West\n";
+	                    System.out.println("West\n");
 	                }else if(directions[i]==3){
-	                    finalPath = finalPath + "South\n";
+	                    System.out.println("South\n");
                             
 	                }else if(directions[i]==4){
-	                    finalPath = finalPath + "East\n";
-	                }
-	            }
-	        }*/
+	                    System.out.println("East\n");
+	                }*/
+	            
+	        }
+	       finalPath = finalPath + "|";
+	       finalSteps = "S"+countSteps;
+	       System.out.println(finalPath);
+	       System.out.println(finalSteps);
+	}
+}
