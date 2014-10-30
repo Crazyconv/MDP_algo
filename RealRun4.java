@@ -971,16 +971,20 @@ public void newExplorationToGoal(){
         if(d[0]==1&&d[1]==0){  //N
         
                 sensor1.add(new int[]{1,-2}); 
-                sensor1.add(new int[]{1,-3}); 
+                sensor1.add(new int[]{1,-3});
+                //sensor1.add(new int[]{1,-4});  
 
                 sensor2.add(new int[]{2,-1});
                 sensor2.add(new int[]{3,-1});
+                //sensor2.add(new int[]{4,-1});
+
 
                 sensor3.add(new int[]{2,0});
                // sensor3.add(new int[]{3,0});
 
                 sensor4.add(new int[]{2,1});
                 sensor4.add(new int[]{3,1});
+                //sensor4.add(new int[]{4,1});
 
                 sensor6.add(new int[]{-1,2});
                 sensor6.add(new int[]{-1,3});
@@ -998,15 +1002,18 @@ public void newExplorationToGoal(){
                 
                 sensor1.add(new int[]{-2,-1}); 
                 sensor1.add(new int[]{-3,-1}); 
+                //sensor1.add(new int[]{-4,-1});
 
                 sensor2.add(new int[]{-1,-2});
                 sensor2.add(new int[]{-1,-3});
+                //sensor2.add(new int[]{-1,-4});
 
                 sensor3.add(new int[]{0,-2});
                 //sensor3.add(new int[]{0,-3});
 
                 sensor4.add(new int[]{1,-2});
                 sensor4.add(new int[]{1,-3});
+                //sensor4.add(new int[]{1,-4});
 
                 sensor6.add(new int[]{2,1});
                 sensor6.add(new int[]{3,1});
@@ -1022,15 +1029,18 @@ public void newExplorationToGoal(){
         else if(d[0]==-1&&d[1]==0){  //S
                 sensor1.add(new int[]{-1,2}); 
                 sensor1.add(new int[]{-1,3}); 
+                //sensor1.add(new int[]{-1,4});
 
                 sensor2.add(new int[]{-2,1});
                 sensor2.add(new int[]{-3,1});
+                //sensor2.add(new int[]{-4,1});
 
                 sensor3.add(new int[]{-2,0});
                 //sensor3.add(new int[]{-3,0});
 
                 sensor4.add(new int[]{-2,-1});
                 sensor4.add(new int[]{-3,-1});
+                //sensor4.add(new int[]{-4,-1});
 
                 sensor6.add(new int[]{1,-2});
                 sensor6.add(new int[]{1,-3});
@@ -1044,15 +1054,18 @@ public void newExplorationToGoal(){
         else{   //E
                 sensor1.add(new int[]{2,1}); 
                 sensor1.add(new int[]{3,1}); 
+                //sensor1.add(new int[]{4,1});
 
                 sensor2.add(new int[]{1,2});
                 sensor2.add(new int[]{1,3});
+                //sensor2.add(new int[]{1,4});
 
                 sensor3.add(new int[]{0,2});
                 //sensor3.add(new int[]{0,3});
 
                 sensor4.add(new int[]{-1,2});
                 sensor4.add(new int[]{-1,3});
+                //sensor4.add(new int[]{-1,4});
 
                 sensor6.add(new int[]{-2,-1});
                 sensor6.add(new int[]{-3,-1});
@@ -1281,7 +1294,7 @@ public void newExplorationToGoal(){
          if(r2<15||r3==1||r4<15) senseFrontObstacle=true;
          if(r2<15&&r4<15) sensorAlignFront=true;
          
-         if(r1<24&&r6>=0) {
+         if(r1<26&&r6>=0) {
              i=(int)(r1+4-10)/10;
              if(r1<10) i=0;
              t=(int[])sensor1.get(i);

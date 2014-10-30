@@ -310,7 +310,7 @@ public class Testing {
                     {2,2,2,2,3,3,3,3,3,3,2,2,2,2,2},   //11
                     {2,2,2,2,3,3,3,3,3,3,2,2,2,2,2},   //12
                     {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},   //13
-                    {2,2,2,2,2,2,2,2,2,2,2,2,2,3,2},   //14
+                    {2,2,2,2,2,2,2,2,2,2,2,2,3,2,2},   //14
                     {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},   //15
                     {2,2,2,2,2,2,2,3,2,2,2,2,2,2,2},   //16
                     {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},   //17
@@ -732,7 +732,7 @@ public class Testing {
                speed=20;
                
                
-               WallSticking6 ws6=new WallSticking6(strP,coverage_limit,sample2,time_limit,speed);
+               WallSticking6 ws6=new WallSticking6(strP,coverage_limit,sample3,time_limit,speed);
                 
                 ws6.start_Exploration(mustFindGoal);
                 System.out.println("Exploration complete");
